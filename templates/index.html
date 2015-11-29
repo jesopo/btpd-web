@@ -17,8 +17,8 @@
 			{% else %}
 			<table class="torrents">
 				<tr class="torrentheadings">
-					<td><a href="?orderby={{ orders[0] }}">Name</a></td>
-					<td><a href="?orderby={{ orders[1] }}">ID</a></td>
+					<td><a href="?orderby={{ orders[0] }}">ID</a></td>
+					<td><a href="?orderby={{ orders[1] }}">Name</a></td>
 					<td><a href="?orderby={{ orders[2] }}">Status</a></td>
 					<td><a href="?orderby={{ orders[3] }}">Percent</a></td>
 					<td><a href="?orderby={{ orders[4] }}">Size</a></td>
@@ -26,8 +26,8 @@
 				</tr>
 				{% for line in lines -%}
 				<tr class="torrent" id="torrent{{ line[1]|e }}">
-					<td class="torrentname">{{ line[0]|e }}</td>
-					<td class="torrentid"><a class="state{{ line[2]|e }}" href="action?id={{ line[1]|e }}&state={{ line[2]| e }}">{{ line[1]|e }}</a></td>
+					<td class="torrentid"><a class="state{{ line[2]|e }}" href="action?id={{ line[0]|e }}&state={{ line[2]| e }}">{{ line[0]|e }}</a></td>
+					<td class="torrentname">{{ line[1]|e }}</td>
 					<td class="torrentstatus">{{ line[2]|e }}</td>
 					<td class="torrentpercent">{{ line[3]|e }}</td>
 					<td class="torrentsize">{{ line[4]|e }}</td>
