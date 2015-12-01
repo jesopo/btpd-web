@@ -1,0 +1,20 @@
+			<table class="torrents">
+				<tr class="torrentheadings">
+					<th><a href="?orderby={{ orders[0] }}">{{ headings[0] }}</a></th>
+					<th><a href="?orderby={{ orders[1] }}">{{ headings[1] }}</a></th>
+					<th><a href="?orderby={{ orders[2] }}">{{ headings[2] }}</a></th>
+					<th><a href="?orderby={{ orders[3] }}">{{ headings[3] }}</a></th>
+					<th><a href="?orderby={{ orders[4] }}">{{ headings[4] }}</a></th>
+					<th><a href="?orderby={{ orders[5] }}">{{ headings[5] }}</a></th>
+				</tr>
+				{% for line in lines -%}
+				<tr class="torrent" id="torrent{{ line[1]|e }}">
+					<td class="torrentid"><a class="state{{ line[2]|e }}" href="action?id={{ line[0]|e }}&state={{ line[2]| e }}">{{ line[0]|e }}</a></td>
+					<td class="torrentname">{{ line[1]|e }}</td>
+					<td class="torrentstatus">{{ line[2]|e }}</td>
+					<td class="torrentpercent">{{ line[3]|e }}</td>
+					<td class="torrentsize">{{ line[4]|e }}</td>
+					<td class="torrentratio">{{ line[5]|e }}</td>
+				</tr>
+				{% endfor %}
+			</table>

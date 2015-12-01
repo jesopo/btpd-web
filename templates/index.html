@@ -15,26 +15,7 @@
 			{% if failed -%}
 			<div id="faileddiv">Failed to connect to btpd</div>
 			{% else %}
-			<table class="torrents">
-				<tr class="torrentheadings">
-					<td><a href="?orderby={{ orders[0] }}">ID</a></td>
-					<td><a href="?orderby={{ orders[1] }}">Name</a></td>
-					<td><a href="?orderby={{ orders[2] }}">Status</a></td>
-					<td><a href="?orderby={{ orders[3] }}">Percent</a></td>
-					<td><a href="?orderby={{ orders[4] }}">Size</a></td>
-					<td><a href="?orderby={{ orders[5] }}">Ratio</a></td>
-				</tr>
-				{% for line in lines -%}
-				<tr class="torrent" id="torrent{{ line[1]|e }}">
-					<td class="torrentid"><a class="state{{ line[2]|e }}" href="action?id={{ line[0]|e }}&state={{ line[2]| e }}">{{ line[0]|e }}</a></td>
-					<td class="torrentname">{{ line[1]|e }}</td>
-					<td class="torrentstatus">{{ line[2]|e }}</td>
-					<td class="torrentpercent">{{ line[3]|e }}</td>
-					<td class="torrentsize">{{ line[4]|e }}</td>
-					<td class="torrentratio">{{ line[5]|e }}</td>
-				</tr>
-				{% endfor %}
-			</table>
+			{% include fragment %}
 			{%- endif %}
 		</div>
 	</body>
