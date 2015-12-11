@@ -6,6 +6,7 @@
 					<th><a href="?orderby={{ orders[3] }}">{{ headings[3] }}</a></th>
 					<th><a href="?orderby={{ orders[4] }}">{{ headings[4] }}</a></th>
 					<th><a href="?orderby={{ orders[5] }}">{{ headings[5] }}</a></th>
+					<th></th>
 				</tr>
 				{% for line in lines -%}
 				<tr class="torrent" id="torrent{{ line[1]|e }}">
@@ -15,6 +16,7 @@
 					<td class="torrentpercent">{{ line[3]|e }}</td>
 					<td class="torrentsize">{{ line[4]|e }}</td>
 					<td class="torrentratio">{{ line[5]|e }}</td>
+					<td><a class="torrentremove" href="remove?id={{ line[0]|e }}">✘</a></td>
 				</tr>
 				{% endfor %}
 			</table>

@@ -1,0 +1,10 @@
+			<div id="adddiv">
+				{%- if failed %}
+				<div id="addfaileddiv">Failed to add torrent</div>
+				{%- endif %}
+				<form action="add" method="post" enctype="multipart/form-data">
+					<input placeholder="directory" name="directory" type="text" />
+					<input name="file" type="file" />
+					<input type="submit" value="Add" />
+				</form>
+			</div>

@@ -12,9 +12,9 @@
 			<div><a href="/">btpd web</a></div>
 		</div>
 		<div id="maindiv">
-			{% if failed -%}
-			<div id="faileddiv">Failed to connect to btpd</div>
-			{% else %}
+			{%- if failed -%}
+			<div id="connectfaileddiv">Failed to connect to btpd</div>
+			{% else -%}
 			{% include fragment %}
 			{%- endif %}
 		</div>

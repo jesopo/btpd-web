@@ -1,0 +1,1 @@
+BASEDIR="/home/media/music"

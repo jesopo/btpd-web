@@ -14,8 +14,16 @@ ARROW_UP = "▴"
 app = flask.Flask(__name__)
 app.config.from_object(Config)
 
+def get_referrer_params():
+	if flask.request.referrer:
+		referrer_params = flask.request.referrer.split("?", 1)
+		if len(referrer_params) > 1:
+			return "?%s" % referrer_params[1]
+	return ""
+
 @app.route("/")
 def index():
+	referrer_params = get_referrer_params()
 	orderby = flask.request.args.get("orderby")
 	descending = True
 	headings = HEADINGS[:]
@@ -28,8 +36,8 @@ def index():
 		orderby = 0
 	else:
 		orderby = int(orderby)
-		arrow = ARROW_DOWN if descending else ARROW_UP
-		headings[orderby] = "%s %s" % (headings[orderby], arrow)
+	arrow = ARROW_DOWN if descending else ARROW_UP
+	headings[orderby] = "%s %s" % (headings[orderby], arrow)
 	parsed_lines = []
 	failed = False
 	if lines[0].startswith("cannot open connection"):
@@ -57,11 +65,6 @@ def index():
 
 @app.route("/action")
 def torrent_action():
-	referrer_params = flask.request.referrer.split("?", 1)
-	if len(referrer_params) > 1:
-		referrer_params = "?%s" % referrer_params[1]
-	else:
-		referrer_params = ""
 	state = flask.request.args["state"]
 	id = flask.request.args["id"]
 	if not id.isdigit() or not state in TORRENT_ACTIONS:
@@ -71,6 +74,36 @@ def torrent_action():
 	if not flask.request.is_xhr:
 		return flask.redirect("%s%s" % (flask.url_for("index"), referrer_params))
 	return "0" if out else "1"
+
+@app.route("/add")
+def add():
+	failed = False
+	if flask.request.method == "POST":
+		directory = flask.request.form["directory"]
+		file = flask.request.files["file"]
+		file.save("/tmp/torrent")
+		try:
+			subprocess.check_call(["btcli", "add", "-d",
+				os.path.join(app.config["BASEDIR"], directory),
+				"/tmp/torrent"])
+			return flask.redirect(flask.url_for("index"))
+		except:
+			failed = True
+	return flask.render_template("index.html",
+		fragment="add.html", failed=failed)
+@app.route("/remove")
+def remove():
+	id = flask.request.args["id"]
+	if "seriously" in flask.request.args:
+		if flask.request.args["seriously"] == "1":
+			subprocess.check_call(["btcli", "del", id])
+		return flask.redirect(flask.url_for("index"))
+	else:
+		title = subprocess.check_output(["btcli", "list", id,
+			"--format", "%n"]).decode("latin-1")
+		return flask.render_template("index.html", id=id,
+			fragment="seriously.html",title=title,
+			warning="Are you sure you want to remove this torrent?")
 
 if __name__ == "__main__":
 	app.run(host="0.0.0.0", debug=True)
