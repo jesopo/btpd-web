@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-import subprocess, time
+import os, subprocess, time
 import flask
 import Config
 
@@ -75,22 +75,19 @@ def torrent_action():
 		return flask.redirect("%s%s" % (flask.url_for("index"), referrer_params))
 	return "0" if out else "1"
 
-@app.route("/add")
+@app.route("/add", methods=["GET", "POST"])
 def add():
 	failed = False
 	if flask.request.method == "POST":
 		directory = flask.request.form["directory"]
 		file = flask.request.files["file"]
 		file.save("/tmp/torrent")
-		try:
-			subprocess.check_call(["btcli", "add", "-d",
-				os.path.join(app.config["BASEDIR"], directory),
-				"/tmp/torrent"])
-			return flask.redirect(flask.url_for("index"))
-		except:
-			failed = True
+		subprocess.check_call(["btcli", "add", "-d",
+			os.path.join(app.config["BASEDIR"], directory),
+			"/tmp/torrent"])
+		return flask.redirect(flask.url_for("index"))
 	return flask.render_template("index.html",
-		fragment="add.html", failed=failed)
+		fragment="add.html")
 @app.route("/remove")
 def remove():
 	id = flask.request.args["id"]
