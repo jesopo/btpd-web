@@ -103,5 +103,5 @@ def remove():
 			warning="Are you sure you want to remove this torrent?")
 
 if __name__ == "__main__":
-	app.run(host="0.0.0.0", debug=True)
+	app.run(host=app.config["BINDHOST"], debug=True)
 

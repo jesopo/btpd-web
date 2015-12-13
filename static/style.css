@@ -16,7 +16,7 @@ body {
 	font-size: 1.1em;
 	font-family: monospace;
 }
-#headerdiv,#maindiv {
+#headerdiv, #maindiv {
 	background-color: #222;
 	max-width: 800px;
 	margin-left: auto;
@@ -35,7 +35,12 @@ body {
 }
 .torrent > td, .torrentheadings > th {
 	border-bottom: 1px solid #111111;
+}
+.torrent > td {
 	padding: 5px 10px;
+}
+.torrentheadings > th {
+	padding: 0px 10px 5px 10px;
 }
 .torrent:last-child {
 	border-bottom: 0;
@@ -47,7 +52,6 @@ body {
 	max-width: 360px;
 }
 .torrentid, .torrentstatus, .torrentpercent, .torrentsize, .torrentratio {
-	margin-left: 8px;
 	text-align: right;
 }
 a {
@@ -70,7 +74,14 @@ a:hover {
 	font-weight: bold;
 	font-size: 1.1em;
 }
-.torrentheadings a {
+.torrentadd {
+	font-size: 1.1em;
+	color: #2C2;
+}
+.torrentadd:hover {
+	text-decoration: none;
+}
+.torrentheading {
 	color: inherit;
 }
 #adddiv {
@@ -115,4 +126,8 @@ a:hover {
 #seriouslybuttons {
 	margin-top: 10px;
 	margin-bottom: 10px;
+}
+#connectionfaileddiv {
+	text-align: center;
+	font-size: 1.3em;
 }

@@ -1,12 +1,14 @@
 			<table class="torrents">
 				<tr class="torrentheadings">
-					<th><a href="?orderby={{ orders[0] }}">{{ headings[0] }}</a></th>
-					<th><a href="?orderby={{ orders[1] }}">{{ headings[1] }}</a></th>
-					<th><a href="?orderby={{ orders[2] }}">{{ headings[2] }}</a></th>
-					<th><a href="?orderby={{ orders[3] }}">{{ headings[3] }}</a></th>
-					<th><a href="?orderby={{ orders[4] }}">{{ headings[4] }}</a></th>
-					<th><a href="?orderby={{ orders[5] }}">{{ headings[5] }}</a></th>
-					<th></th>
+					<th><a class="torrentheading" href="?orderby={{ orders[0] }}">{{ headings[0] }}</a></th>
+					<th><a class="torrentheading" href="?orderby={{ orders[1] }}">{{ headings[1] }}</a></th>
+					<th><a class="torrentheading" href="?orderby={{ orders[2] }}">{{ headings[2] }}</a></th>
+					<th><a class="torrentheading" href="?orderby={{ orders[3] }}">{{ headings[3] }}</a></th>
+					<th><a class="torrentheading" href="?orderby={{ orders[4] }}">{{ headings[4] }}</a></th>
+					<th><a class="torrentheading" href="?orderby={{ orders[5] }}">{{ headings[5] }}</a></th>
+					<th><a class="torrentadd" href="add">+</a></th>
+				</tr>
+				<tr class="torrent torrentaddline">
 				</tr>
 				{% for line in lines -%}
 				<tr class="torrent" id="torrent{{ line[1]|e }}">
