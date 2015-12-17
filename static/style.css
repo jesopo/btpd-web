@@ -13,6 +13,7 @@ body {
 #maindiv {
 	margin-top: 10px;
 	padding-top: 10px;
+	padding-bottom: 5px;
 	font-size: 1.1em;
 	font-family: monospace;
 }
@@ -92,7 +93,7 @@ a:hover {
 #adddiv input {
 	width: 100%;
 	box-sizing: border-box;
-	margin-bottom: 10px;
+	margin-bottom: 5px;
 }
 .torrentremove {
 	color: #C22;
@@ -130,4 +131,20 @@ a:hover {
 #connectionfaileddiv {
 	text-align: center;
 	font-size: 1.3em;
+}
+#logindiv {
+	max-width: 250px;
+	margin-left: auto;
+	margin-right: auto;
+}
+#logindiv input {
+	box-sizing: border-box;
+	width: 100%;
+	margin-bottom: 5px;
+}
+#loginfaileddiv {
+	font-size: 1.2em;
+	color: #C22;
+	text-align: center;
+	margin-bottom: 5px;
 }

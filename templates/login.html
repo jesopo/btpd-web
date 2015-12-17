@@ -1,0 +1,10 @@
+			<div id="logindiv">
+				<form id="loginform" action="login" method="POST">
+					<input type="text" name="username" placeholder="username" />
+					<input type="password" name="password" placeholder="password" />
+					<input type="submit" value="Login" />
+				</form>
+				{% if loginfailed -%}
+				<div id="loginfaileddiv">Login failed.</div>
+				{%- endif %}
+			</div>
