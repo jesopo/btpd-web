@@ -3,7 +3,7 @@
 import argparse, base64, getpass, os, subprocess, sqlite3
 import threading, time
 import flask, scrypt
-import Config
+import Config, Database
 
 TORRENT_STATES = {"S": "seed", "I": "idle", "L": "leech", "+": "starting"}
 TORRENT_ACTIONS = {"seed": "stop", "idle": "start", "leech": "start"}
@@ -15,62 +15,14 @@ ARROW_UP = "▴"
 app = flask.Flask(__name__)
 app.config.from_object(Config)
 
-def get_database():
-	if not hasattr(flask.g, "databases"):
-		flask.g.databases = {}
-	id = threading.current_thread().ident
-	if not id in flask.g.databases:
-		flask.g.databases[id] = sqlite3.connect("btpd-web.db")
-	return flask.g.databases[id]
-def get_cursor():
-	if not hasattr(flask.g, "cursors"):
-		flask.g.cursors = {}
-		make_table()
-	id = threading.current_thread().ident
-	if not id in flask.g.cursors:
-		flask.g.cursors[id] = get_database().cursor()
-	return flask.g.cursors[id]
+database = Database.Database()
 
-def make_table():
-	try:
-		get_cursor().execute("""CREATE TABLE users (username text,
-			session text, hash text, salt text)""")
-	except sqlite3.OperationalError:
-		pass
-
-def make_hash(password, salt):
-	return base64.b64encode(scrypt.hash(password, salt))
-def make_salt():
-	return base64.b64encode(os.urandom(32)).decode("utf8")
-def authenticate(username, password):
-	get_cursor().execute(
-		"SELECT hash, salt FROM users WHERE username=?", [
-		username])
-	hash, salt = get_cursor().fetchone() or [None, None]
-	if hash and hash == make_hash(password, salt).decode("utf8"):
-		return True
-	return False
 def is_authenticated():
-	if flask.request.cookies.get("btpd-session"):
-		get_cursor().execute(
-			"SELECT username FROM users WHERE session=?",
-			[flask.request.cookies["btpd-session"]])
-		username = get_cursor().fetchone()
-		if username:
-			return True
-	return False
-def make_session():
-	return base64.b64encode(os.urandom(32)).decode("utf8")
-def set_session(username, session):
-	get_cursor().execute(
-		"UPDATE users SET session=? WHERE username=?",
-		[session, username])
-	get_database().commit()
-def add_user(username, password, salt):
-	get_cursor().execute("""INSERT INTO USERS (username, password,
-		salt) VALUES (?, ?, ?)""", [username, password, salt])
-	get_database.commit()
-
+	with database:
+		return database.is_authenticated(flask.request.cookies[
+			"btpd-session"])
+def login_redirect():
+	return flask.redirect(flask.url_for("login"))
 def get_referrer_params():
 	if flask.request.referrer:
 		referrer_params = flask.request.referrer.split("?", 1)
@@ -81,7 +33,7 @@ def get_referrer_params():
 @app.route("/")
 def index():
 	if not is_authenticated():
-		return flask.redirect(flask.url_for("login"))
+		return login_redirect()
 	referrer_params = get_referrer_params()
 	orderby = flask.request.args.get("orderby")
 	descending = True
@@ -124,9 +76,9 @@ def index():
 
 @app.route("/action")
 def torrent_action():
-	referrer_params = get_referrer_params()
 	if not is_authenticated():
-		return flask.redirect(flask.url_for("login"))
+		return login_redirect()
+	referrer_params = get_referrer_params()
 	state = flask.request.args["state"]
 	id = flask.request.args["id"]
 	if not id.isdigit() or not state in TORRENT_ACTIONS:
@@ -140,7 +92,7 @@ def torrent_action():
 @app.route("/add", methods=["GET", "POST"])
 def add():
 	if not is_authenticated():
-		return flask.redirect(flask.url_for("login"))
+		return login_redirect()
 	failed = False
 	if flask.request.method == "POST":
 		directory = flask.request.form["directory"]
@@ -155,7 +107,7 @@ def add():
 @app.route("/remove")
 def remove():
 	if not is_authenticated():
-		return flask.redirect(flask.url_for("login"))
+		return login_redirect()
 	id = flask.request.args["id"]
 	if "seriously" in flask.request.args:
 		if flask.request.args["seriously"] == "1":
@@ -170,26 +122,28 @@ def remove():
 
 @app.route("/login", methods=["GET", "POST"])
 def login():
+	if is_authenticated():
+		return flask.redirect(flask.url_for("index"))
 	if flask.request.method == "GET":
-		if is_authenticated():
-			return flask.redirect(flask.url_for("index"))
 		return flask.render_template("index.html",
 			fragment="login.html", loginfailed=False)
 	elif flask.request.method == "POST":
 		username = flask.request.form["username"]
 		password = flask.request.form["password"]
-		if authenticate(username, password):
-			session = make_session()
-			set_session(username, session)
-			response = flask.make_response(
-				flask.redirect(flask.url_for(
-				"index")))
-			response.set_cookie("btpd-session", session)
-			return response
-		else:
-			return flask.render_template("index.html",
-				fragment="login.html",
-				loginfailed=True)
+		with database:
+			if database.authenticate(username, password):
+				session = database.make_session()
+				database.add_session(username, session)
+				response = flask.make_response(
+					flask.redirect(flask.url_for(
+					"index")))
+				response.set_cookie("btpd-session",
+					session)
+				return response
+			else:
+				return flask.render_template("index.html",
+					fragment="login.html",
+					loginfailed=True)
 if __name__ == "__main__":
 	bindhost = app.config.get("BINDHOST", "127.0.0.1")
 	port = app.config.get("PORT", 5000)
