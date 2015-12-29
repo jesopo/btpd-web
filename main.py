@@ -6,7 +6,7 @@ import flask, scrypt
 import Config, Database
 
 TORRENT_STATES = {"S": "seed", "I": "idle", "L": "leech", "+": "starting"}
-TORRENT_ACTIONS = {"seed": "stop", "idle": "start", "leech": "start"}
+TORRENT_ACTIONS = {"seed": "stop", "idle": "start", "leech": "stop", "starting": "stop"}
 
 HEADINGS= ["ID", "Name", "Status", "Percent", "Size", "Ratio"]
 ARROW_DOWN = "▾"

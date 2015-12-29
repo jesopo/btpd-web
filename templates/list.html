@@ -11,7 +11,7 @@
 				<tr class="torrent torrentaddline">
 				</tr>
 				{% for line in lines -%}
-				<tr class="torrent" id="torrent{{ line[1]|e }}">
+				<tr class="torrent" id="torrent{{ line[0]|e }}">
 					<td class="torrentid"><a class="state{{ line[2]|e }}" href="action?id={{ line[0]|e }}&state={{ line[2]| e }}">{{ line[0]|e }}</a></td>
 					<td class="torrentname">{{ line[1]|e }}</td>
 					<td class="torrentstatus">{{ line[2]|e }}</td>

@@ -9,6 +9,7 @@ body {
 }
 #headerdiv a {
 	color: inherit;
+    text-transform: uppercase;
 }
 #maindiv {
 	margin-top: 10px;
@@ -43,7 +44,7 @@ body {
 .torrentheadings > th {
 	padding: 0px 10px 5px 10px;
 }
-.torrent:last-child {
+.torrent:last-child td {
 	border-bottom: 0;
 }
 .torrentname {
@@ -61,13 +62,13 @@ a {
 a:hover {
 	text-decoration: underline;
 }
-.stateseed {
+.stateseed, .stateseed a:visited {
 	color: #2C2;
 }
-.stateidle {
+.stateidle, .stateidle a:visited {
 	color: #C22;
 }
-.statestarting {
+.statestarting, .statestarting a:visited {
 	color: inherit;
 
 }
@@ -75,7 +76,7 @@ a:hover {
 	font-weight: bold;
 	font-size: 1.1em;
 }
-.torrentadd {
+.torrentadd, .torrentadd a:visited {
 	font-size: 1.1em;
 	color: #2C2;
 }
@@ -95,7 +96,7 @@ a:hover {
 	box-sizing: border-box;
 	margin-bottom: 5px;
 }
-.torrentremove {
+.torrentremove, .torrentremove a:visited {
 	color: #C22;
 }
 #seriouslydiv {
