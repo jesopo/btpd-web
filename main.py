@@ -29,19 +29,28 @@ def get_referrer_params():
 		if len(referrer_params) > 1:
 			return "?%s" % referrer_params[1]
 	return ""
-
+def make_page(fragment, **kwargs):
+	username = None
+	admin = False
+	session = flask.request.cookies.get("btpd-session")
+	with database:
+		username = database.username_from_session(session)
+		admin = database.is_admin(session)
+	return flask.render_template("index.html", fragment=fragment,
+		username=username, admin=admin, **kwargs)
 @app.route("/")
 def index():
 	if not is_authenticated():
 		return login_redirect()
 	referrer_params = get_referrer_params()
-	orderby = flask.request.args.get("orderby")
+	orderby = flask.request.args.get("orderby", "0")
 	descending = True
 	headings = HEADINGS[:]
 	if orderby and orderby.startswith("-"):
 		descending = False
 		orderby = orderby[1:]
-	lines = subprocess.check_output(["btcli", "list", "-f", "%n %# %t %p %S %r %s\\n"]
+	lines = subprocess.check_output([
+        "btcli", "list", "-f", "%n %# %t %p %S %r %s\\n"]
 		).decode("utf8").strip().split("\n")
 	if not orderby or not orderby.isdigit() or int(orderby) >= len(lines)-1:
 		orderby = 0
@@ -65,14 +74,23 @@ def index():
 			parsed_lines.append(line)
 	orders = ["%s%d" % ("-" if n == orderby and descending else "", n) for n in range(6)]
 	parsed_lines = sorted(parsed_lines, key=lambda l: l[orderby], reverse=descending)
+
+	page = int(flask.request.args.get("page", 1))-1
+	next_page = page+1
+	pages = int(len(parsed_lines)/app.config["PER_PAGE"])
+	if len(parsed_lines)%app.config["PER_PAGE"] > 0:
+		pages += 1
+	parsed_lines = parsed_lines[app.config["PER_PAGE"
+		]*page:app.config["PER_PAGE"]*next_page]
+
 	for n, line in enumerate(parsed_lines):
 		line[3] = "%.1f" % line[3]
 		line[4] = line.pop(6)
 		line[5] = "%.2f" % line[5]
 		parsed_lines[n] = line
-	return flask.render_template("index.html", failed=failed,
-		lines=parsed_lines, orders=orders, fragment="list.html",
-		headings=headings)
+	return make_page("list.html", failed=failed, lines=parsed_lines,
+		orders=orders, headings=headings, pages=pages, page=page,
+		orderby=orderby)
 
 @app.route("/action")
 def torrent_action():
@@ -102,8 +120,7 @@ def add():
 			os.path.join(app.config["BASEDIR"], directory),
 			"/tmp/torrent"])
 		return flask.redirect(flask.url_for("index"))
-	return flask.render_template("index.html",
-		fragment="add.html")
+	return make_page("add.html")
 @app.route("/remove")
 def remove():
 	if not is_authenticated():
@@ -116,8 +133,7 @@ def remove():
 	else:
 		title = subprocess.check_output(["btcli", "list", id,
 			"--format", "%n"]).decode("latin-1")
-		return flask.render_template("index.html", id=id,
-			fragment="seriously.html",title=title,
+		return make_page("seriously.html", id=id, title=title,
 			warning="Are you sure you want to remove this torrent?")
 
 @app.route("/login", methods=["GET", "POST"])
@@ -125,8 +141,7 @@ def login():
 	if is_authenticated():
 		return flask.redirect(flask.url_for("index"))
 	if flask.request.method == "GET":
-		return flask.render_template("index.html",
-			fragment="login.html", loginfailed=False)
+		return make_page("login.html", loginfailed=False)
 	elif flask.request.method == "POST":
 		username = flask.request.form["username"]
 		password = flask.request.form["password"]
@@ -141,9 +156,20 @@ def login():
 					session)
 				return response
 			else:
-				return flask.render_template("index.html",
-					fragment="login.html",
+				return make_page("login.html",
 					loginfailed=True)
+@app.route("/logout")
+def logout():
+	if is_authenticated():
+		with database:
+			database.del_session(flask.request.cookies[
+				"btpd-session"])
+	return login_redirect()
+@app.route("/settings")
+def settings():
+	if not is_authenticated():
+		return login_redirect()
+	return make_page("settings.html")
 if __name__ == "__main__":
 	bindhost = app.config.get("BINDHOST", "127.0.0.1")
 	port = app.config.get("PORT", 5000)

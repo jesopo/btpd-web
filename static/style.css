@@ -1,15 +1,16 @@
 body {
 	color: #CCC;
 	background-color: #434343;
+	overflow-y: scroll;
+	text-shadow: rgba(0, 0, 0, 0.01) 0 0 1px;
+	-webkit-font-smoothing: antialiased;
 }
 #headerdiv {
 	margin-top: 20px;
-	letter-spacing: 8px;
 	font-family: 'Montserrat', sans-serif;
 }
 #headerdiv a {
 	color: inherit;
-    text-transform: uppercase;
 }
 #maindiv {
 	margin-top: 10px;
@@ -26,10 +27,17 @@ body {
 	border: 1px solid #000;
 	box-shadow: 0px 0px 12px 1px #111;
 }
-#headerdiv > div {
+#titlediv {
 	text-align: center;
-	padding: 10px 0px;
+	padding: 10px 10px 0px 10px;
 	font-size: 4em;
+	letter-spacing: 8px;
+	text-transform: uppercase;
+}
+#userdiv {
+	text-align: right;
+	padding: 0px 5px 5px 5px;
+	font-size: 0.8em;
 }
 .torrents {
 	width: 100%;
@@ -44,9 +52,9 @@ body {
 .torrentheadings > th {
 	padding: 0px 10px 5px 10px;
 }
-.torrent:last-child td {
+/*.torrent:last-child td {
 	border-bottom: 0;
-}
+}*/
 .torrentname {
 	white-space: nowrap;
 	overflow: hidden;
@@ -148,4 +156,16 @@ a:hover {
 	color: #C22;
 	text-align: center;
 	margin-bottom: 5px;
+}
+#torrentpagesdiv {
+	margin: 5px 0px 1px 0px;
+	font-size: 0.85em;
+	text-align: center;
+	word-spacing: 3px;
+}
+#torrentpagesdiv a {
+	color: #555;
+}
+#torrentpagesdiv span {
+	text-decoration: underline;
 }

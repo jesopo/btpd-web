@@ -12,7 +12,7 @@ class Database(object):
 			if self.user_count() == 0:
 				password = base64.b64encode(
 					os.urandom(16)).decode("utf8")
-				self.add_user("root", password)
+				self.add_user("root", password, True)
 				print("added root user.")
 				print("password: %s" % password)
 	def __enter__(self):
@@ -28,7 +28,8 @@ class Database(object):
 		try:
 			self.cursor.execute("""CREATE TABLE users (
 				id INTEGER PRIMARY KEY, username text
-				UNIQUE, hash text, salt texxt)""")
+				UNIQUE, hash text, salt text, admin
+				bool)""")
 		except sqlite3.OperationalError:
 			pass
 	def make_sessions_table(self):
@@ -71,19 +72,34 @@ class Database(object):
 			return True
 		return False
 	def is_authenticated(self, session):
-		self.cursor.execute(
-			"SELECT id FROM sessions WHERE session=?",
-			[session])
-		id = self.cursor.fetchone()
+		id = self.id_from_session(session)
 		return bool(id)
-	def add_user(self, username, password):
+	def add_user(self, username, password, admin=False):
 		salt = self.make_salt()
 		hash = self.make_hash(password, salt)
 		self.cursor.execute("""INSERT INTO users (id,
-			username, hash, salt) VALUES (?, ?, ?, ?)""",
-			[None, username, hash, salt])
+			username, hash, salt, admin) VALUES (?, ?, ?,
+			?, ?)""", [None, username, hash, salt, admin])
 	def user_count(self):
 		self.cursor.execute(
 			"SELECT COUNT(*) FROM users")
 		return self.cursor.fetchone()[0]
+	def id_from_session(self, session):
+		self.cursor.execute(
+			"SELECT id FROM sessions WHERE session=?",
+			[session])
+		id = self.cursor.fetchone()
+		return (id or [None])[0]
+	def username_from_session(self, session):
+		id = self.id_from_session(session)
+		self.cursor.execute(
+			"SELECT username FROM users WHERE id=?", [id])
+		username = self.cursor.fetchone()
+		return (username or [None])[0]
+	def is_admin(self, session):
+		id = self.id_from_session(session)
+		self.cursor.execute(
+			"SELECT admin FROM users WHERE id=?", [id])
+		admin = self.cursor.fetchone()
+		return (admin or [None])[0]
 Database()

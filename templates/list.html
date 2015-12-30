@@ -8,8 +8,6 @@
 					<th><a class="torrentheading" href="?orderby={{ orders[5] }}">{{ headings[5] }}</a></th>
 					<th><a class="torrentadd" href="add">+</a></th>
 				</tr>
-				<tr class="torrent torrentaddline">
-				</tr>
 				{% for line in lines -%}
 				<tr class="torrent" id="torrent{{ line[0]|e }}">
 					<td class="torrentid"><a class="state{{ line[2]|e }}" href="action?id={{ line[0]|e }}&state={{ line[2]| e }}">{{ line[0]|e }}</a></td>
@@ -22,3 +20,12 @@
 				</tr>
 				{% endfor %}
 			</table>
+			<div id="torrentpagesdiv">
+			{%- for n in range(pages) %}
+				{% if page == n -%}
+				<span>{{ n+1 }}</span>
+				{%- else -%}
+				<a href="?page={{ n+1 }}&orderby={{ orderby }}">{{ n+1 }}</a>
+				{%- endif -%}
+			{% endfor %}
+			</div>
