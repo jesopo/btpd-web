@@ -9,6 +9,7 @@ class Database(object):
 		with self:
 			self.make_users_table()
 			self.make_sessions_table()
+			self.make_torrents_table()
 			if self.user_count() == 0:
 				password = base64.b64encode(
 					os.urandom(16)).decode("utf8")
@@ -38,6 +39,14 @@ class Database(object):
 				id int, session text UNIQUE, FOREIGN
 				KEY(id) REFERENCES users(id) ON DELETE
 				CASCADE)""")
+		except sqlite3.OperationalError:
+			pass
+	def make_torrents_table(self):
+		try:
+			self.cursor.execute("""CREATE TABLE torrents (
+				info_hash text PRIMARY KEY, id int,
+				FOREIGN KEY(id) REFERENCES users(id)
+				ON DELETE CASCADE)""")
 		except sqlite3.OperationalError:
 			pass
 	def make_salt(self):
@@ -80,14 +89,28 @@ class Database(object):
 		self.cursor.execute("""INSERT INTO users (id,
 			username, hash, salt, admin) VALUES (?, ?, ?,
 			?, ?)""", [None, username, hash, salt, admin])
+	def del_user(self, id):
+		self.cursor.execute(
+			"DELETE FROM users WHERE id=?", [id])
 	def user_count(self):
 		self.cursor.execute(
 			"SELECT COUNT(*) FROM users")
 		return self.cursor.fetchone()[0]
+	def username_from_id(self, id):
+		self.cursor.exeute(
+			"SELECT username FROM users WHERE id=?", [id])
+		username = self.cursor.fetchone()
+		return (username or [None])[0]
 	def id_from_session(self, session):
 		self.cursor.execute(
 			"SELECT id FROM sessions WHERE session=?",
 			[session])
+		id = self.cursor.fetchone()
+		return (id or [None])[0]
+	def id_from_username(self, username):
+		self.cursor.execute(
+			"SELECT id FROM users WHERE username=?",
+			[username])
 		id = self.cursor.fetchone()
 		return (id or [None])[0]
 	def username_from_session(self, session):
@@ -102,4 +125,15 @@ class Database(object):
 			"SELECT admin FROM users WHERE id=?", [id])
 		admin = self.cursor.fetchone()
 		return (admin or [None])[0]
+	def list_users(self):
+		self.cursor.execute(
+			"SELECT id, username,admin FROM users")
+		users = self.cursor.fetchall()
+		return users
+	def add_torrent(self, info_hash, username):
+		id = self.id_from_username(username)
+		if id:
+			self.cursor.execute("""INSERT INTO torrents (
+				info_hash, id) VALUES (?, ?)""",
+				[info_hash, id])
 Database()

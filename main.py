@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
 
-import argparse, base64, getpass, os, subprocess, sqlite3
-import threading, time
-import flask, scrypt
+import argparse, base64, codecs, hashlib, os, subprocess
+import sqlite3, threading, time
+import flask, scrypt, libtorrent, werkzeug
 import Config, Database
+import bencode
 
 TORRENT_STATES = {"S": "seed", "I": "idle", "L": "leech", "+": "starting"}
 TORRENT_ACTIONS = {"seed": "stop", "idle": "start", "leech": "stop", "starting": "stop"}
@@ -12,6 +13,8 @@ HEADINGS= ["ID", "Name", "Status", "Percent", "Size", "Ratio"]
 ARROW_DOWN = "▾"
 ARROW_UP = "▴"
 
+USERS_ACTIONS = ["delete", "add"]
+
 app = flask.Flask(__name__)
 app.config.from_object(Config)
 
@@ -19,7 +22,12 @@ database = Database.Database()
 
 def is_authenticated():
 	with database:
-		return database.is_authenticated(flask.request.cookies[
+		return database.is_authenticated(
+			flask.request.cookies.get(
+			"btpd-session"))
+def is_admin():
+	with database:
+		return database.is_admin(flask.request.cookies[
 			"btpd-session"])
 def login_redirect():
 	return flask.redirect(flask.url_for("login"))
@@ -50,7 +58,7 @@ def index():
 		descending = False
 		orderby = orderby[1:]
 	lines = subprocess.check_output([
-        "btcli", "list", "-f", "%n %# %t %p %S %r %s\\n"]
+	        "btcli", "list", "-f", "%n %# %t %p %S %r %s %h\\n"]
 		).decode("utf8").strip().split("\n")
 	if not orderby or not orderby.isdigit() or int(orderby) >= len(lines)-1:
 		orderby = 0
@@ -64,7 +72,7 @@ def index():
 		failed = True
 	else:
 		for line in lines[1:]:
-			line = line.rsplit(None, 6)
+			line = line.rsplit(None, 7)
 			line.insert(0, int(line.pop(1)))
 			line.insert(3, float(line.pop(3)[:-1]))
 			line.insert(4, int(line.pop(4)))
@@ -114,11 +122,42 @@ def add():
 	failed = False
 	if flask.request.method == "POST":
 		directory = flask.request.form["directory"]
-		file = flask.request.files["file"]
-		file.save("/tmp/torrent")
-		subprocess.check_call(["btcli", "add", "-d",
+		if directory.startswith("/"):
+			directory = directory[1:]
+		if "../" in directory:
+			return flask.abort(400)
+		filename = "/tmp/btpd.%d." % os.getpid()
+		if flask.request.form["url"].strip():
+			filename = "%surl.%s.torrent" % (filename,
+				hashlib.md5(flask.request.form[
+				"url"].encode("utf8")).hexdigest())
+			subprocess.check_call(["wget", "-O",
+				filename, flask.request.form[
+				"url"]])
+		else:
+			file = flask.request.files["file"]
+			filename = "%sfile.%s.torrent" % (filename,
+				hashlib.md5(file.read()
+				).hexdigest())
+			file.save(filename)
+
+		torrent = libtorrent.bdecode(open(filename, "rb"
+			).read())
+		info_hash = codecs.encode(libtorrent.torrent_info(torrent
+			).info_hash().to_bytes(), "hex")
+
+		idle = "idle" in flask.request.form
+		add_command = ["btcli", "add", "-d",
 			os.path.join(app.config["BASEDIR"], directory),
-			"/tmp/torrent"])
+			filename]
+		if idle:
+			add_command.append("-N")
+		subprocess.check_call(add_command)
+		os.remove(filename)
+		with database:
+			username = database.username_from_session(
+				flask.request.cookies["btpd-session"])
+			database.add_torrent(info_hash, username)
 		return flask.redirect(flask.url_for("index"))
 	return make_page("add.html")
 @app.route("/remove")
@@ -170,6 +209,49 @@ def settings():
 	if not is_authenticated():
 		return login_redirect()
 	return make_page("settings.html")
+@app.route("/users", methods=["GET", "POST"])
+def users():
+	if not is_admin():
+		return flask.abort(400)
+	if "action" in flask.request.args:
+		if not flask.request.method == "POST":
+			return flask.abort(400)
+		action = flask.request.args["action"].lower()
+		if not action in USERS_ACTIONS:
+			return flask.abort(400)
+		if action == "add":
+			if not "username" in flask.request.args:
+				return make_page("adduser.html")
+			else:
+				username = flask.form.args["username"]
+				password = flask.form.args["password"]
+				admin = admin in flask.request.form
+				with database:
+					database.add_user(username,
+						password, admin)
+				return flask.redirect(flask.url_for(
+					"users"))
+		elif action == "delete":
+			id = flask.request.args["id"]
+			if "seriously" in flask.request.args:
+				if flask.request.args["seriously"] == "1":
+					with database:
+						database.del_user(id)
+					return flask.redirect(
+						flask.url_for("users"))
+			else:
+				with database:
+					username = database.username_from_id(
+						id)
+				return make_page("userdelete.html",
+					id=id, username=username)
+	with database:
+		users = database.list_users()
+	for i, user in enumerate(users):
+		user = list(user)
+		user[2] = bool(user[2])
+		users[i] = user
+	return make_page("users.html", users=users)
 if __name__ == "__main__":
 	bindhost = app.config.get("BINDHOST", "127.0.0.1")
 	port = app.config.get("PORT", 5000)

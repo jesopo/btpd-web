@@ -13,9 +13,9 @@ body {
 	color: inherit;
 }
 #maindiv {
-	margin-top: 10px;
+	margin-top: 8px;
 	padding-top: 10px;
-	padding-bottom: 5px;
+	padding-bottom: 10px;
 	font-size: 1.1em;
 	font-family: monospace;
 }
@@ -70,11 +70,14 @@ a {
 a:hover {
 	text-decoration: underline;
 }
-.stateseed, .stateseed a:visited {
+.stateseed {
 	color: #2C2;
 }
-.stateidle, .stateidle a:visited {
+.stateidle {
 	color: #C22;
+}
+.stateleech {
+	color: #22C;
 }
 .statestarting, .statestarting a:visited {
 	color: inherit;
@@ -95,14 +98,16 @@ a:hover {
 	color: inherit;
 }
 #adddiv {
-	width: 250px;
+	width: 280px;
 	margin-left: auto;
 	margin-right: auto;
 }
 #adddiv input {
-	width: 100%;
 	box-sizing: border-box;
 	margin-bottom: 5px;
+}
+#adddiv input:last-child {
+	margin-bottom: 0px;
 }
 .torrentremove, .torrentremove a:visited {
 	color: #C22;
@@ -135,7 +140,6 @@ a:hover {
 }
 #seriouslybuttons {
 	margin-top: 10px;
-	margin-bottom: 10px;
 }
 #connectionfaileddiv {
 	text-align: center;
@@ -158,7 +162,7 @@ a:hover {
 	margin-bottom: 5px;
 }
 #torrentpagesdiv {
-	margin: 5px 0px 1px 0px;
+	margin-top: 10px;
 	font-size: 0.85em;
 	text-align: center;
 	word-spacing: 3px;
@@ -168,4 +172,50 @@ a:hover {
 }
 #torrentpagesdiv span {
 	text-decoration: underline;
+}
+#userlistdiv {
+	width: 400px;
+	margin-left: auto;
+	margin-right: auto;
+}
+#userlistdiv table {
+	width: 100%;
+	border-collapse: collapse;
+	border: 1px solid #111111;
+}
+#userlistdiv th {
+	font-size: 1.1em;	
+}
+#userlistdiv td {
+	text-align: center;
+}
+#userlistdiv th, #userlistdiv td {
+	border-bottom: 1px solid #111111;
+	padding: 5px 10px;	
+}
+#userlistdiv td a {
+	color: #C22;
+}
+#userlistdiv th a {
+	color: #2C2;
+	font-size: 1.1em;
+}
+.username {
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	max-width: 200px;
+}
+.fullwidth {
+	width: 100%;
+}
+#adddiv input:last-child {
+	margin-top: 5px;
+}
+#adddiv span {
+	margin-left: 4px;
+}
+#ordiv {
+	text-align: center;
+	margin-bottom: 5px;
 }
