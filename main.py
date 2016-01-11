@@ -1,10 +1,9 @@
 #!/usr/bin/env python3
 
-import argparse, base64, codecs, hashlib, os, subprocess
-import sqlite3, threading, time
+import argparse, base64, codecs, datetime, hashlib, os
+import subprocess, sqlite3, threading, time
 import flask, scrypt, libtorrent, werkzeug
 import Config, Database
-import bencode
 
 TORRENT_STATES = {"S": "seed", "I": "idle", "L": "leech", "+": "starting"}
 TORRENT_ACTIONS = {"seed": "stop", "idle": "start", "leech": "stop", "starting": "stop"}
@@ -191,8 +190,11 @@ def login():
 				response = flask.make_response(
 					flask.redirect(flask.url_for(
 					"index")))
+				expiration = datetime.datetime.now()
+				expiration += datetime.timedelta(
+					days=90)
 				response.set_cookie("btpd-session",
-					session)
+					session, expires=expiration)
 				return response
 			else:
 				return make_page("login.html",
