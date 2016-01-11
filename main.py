@@ -91,7 +91,7 @@ def index():
 		]*page:app.config["PER_PAGE"]*next_page]
 
 	for n, line in enumerate(parsed_lines):
-		line[3] = "%.1f" % line[3]
+		line[3] = "%.1f%%" % line[3]
 		line[4] = line.pop(6)
 		line[5] = "%.2f" % line[5]
 		parsed_lines[n] = line
