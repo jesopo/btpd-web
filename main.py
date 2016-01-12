@@ -3,7 +3,7 @@
 import argparse, base64, codecs, datetime, hashlib, os
 import subprocess, sqlite3, threading, time
 import flask, scrypt, libtorrent, werkzeug
-import Config, Database
+import Config, Database, Utils
 
 TORRENT_STATES = {"S": "seed", "I": "idle", "L": "leech", "+": "starting"}
 TORRENT_ACTIONS = {"seed": "stop", "idle": "start", "leech": "stop", "starting": "stop"}
@@ -56,9 +56,8 @@ def index():
 	if orderby and orderby.startswith("-"):
 		descending = False
 		orderby = orderby[1:]
-	lines = subprocess.check_output([
-	        "btcli", "list", "-f", "%n %# %t %p %S %r %s %h\\n"]
-		).decode("utf8").strip().split("\n")
+
+	lines = Utils.get_torrent_list()
 	if not orderby or not orderby.isdigit() or int(orderby) >= len(lines)-1:
 		orderby = 0
 	else:
@@ -108,8 +107,7 @@ def torrent_action():
 	id = flask.request.args["id"]
 	if not id.isdigit() or not state in TORRENT_ACTIONS:
 		return flask.abort(400)
-	out = subprocess.check_output(["btcli", TORRENT_ACTIONS[state], id],
-		stderr=subprocess.STDOUT)
+	Utils.do_torrent_action(id, TORRENT_ACTIONS[state])
 	if not flask.request.is_xhr:
 		return flask.redirect("%s%s" % (flask.url_for("index"), referrer_params))
 	return "0" if out else "1"
@@ -146,13 +144,11 @@ def add():
 			).info_hash().to_bytes(), "hex")
 
 		idle = "idle" in flask.request.form
-		add_command = ["btcli", "add", "-d",
-			os.path.join(app.config["BASEDIR"], directory),
-			filename]
-		if idle:
-			add_command.append("-N")
-		subprocess.check_call(add_command)
+		directory = os.path.join(app.config["BASEDIR"], directory)
+
+		Utils.add_torrent(directory, filename, idle)
 		os.remove(filename)
+
 		with database:
 			username = database.username_from_session(
 				flask.request.cookies["btpd-session"])
@@ -166,11 +162,10 @@ def remove():
 	id = flask.request.args["id"]
 	if "seriously" in flask.request.args:
 		if flask.request.args["seriously"] == "1":
-			subprocess.check_call(["btcli", "del", id])
+			Utils.remove_torrent(id)
 		return flask.redirect(flask.url_for("index"))
 	else:
-		title = subprocess.check_output(["btcli", "list", id,
-			"--format", "%n"]).decode("latin-1")
+		title = Utils.get_torrent_title(id)
 		return make_page("seriously.html", id=id, title=title,
 			warning="Are you sure you want to remove this torrent?")
 
