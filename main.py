@@ -26,8 +26,9 @@ def fill_torrent_list():
 	while True:
 		global last_list
 		global torrent_list
+		lines = Utils.get_torrent_list()
 		with list_lock:
-			torrent_list = Utils.get_torrent_list()
+			torrent_list = lines
 		since_last = time.time()-last_list
 		interval = app.config.get("LIST_INTERVAL", 4)
 		if last_list == 0 or since_last < interval:
@@ -267,7 +268,7 @@ def users():
 		users = database.list_users()
 	for i, user in enumerate(users):
 		user = list(user)
-		user[2] = bool(user[2])
+		user[2] = "✓" if user[2] == 1 else "✘"
 		users[i] = user
 	return make_page("users.html", users=users)
 if __name__ == "__main__":
