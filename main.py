@@ -88,18 +88,15 @@ def index():
 	headings[orderby] = "%s %s" % (headings[orderby], arrow)
 	parsed_lines = []
 	failed = False
-	if lines[0].startswith("cannot open connection"):
-		failed = True
-	else:
-		for line in lines[1:]:
-			line = line.rsplit(None, 7)
-			line.insert(0, int(line.pop(1)))
-			line.insert(3, float(line.pop(3)[:-1]))
-			line.insert(4, int(line.pop(4)))
-			line.insert(5, float(line.pop(5)))
-			if line[2] in TORRENT_STATES:
-				line[2] = TORRENT_STATES[line[2]]
-			parsed_lines.append(line)
+	for line in lines[1:]:
+		line = line.rsplit(None, 7)
+		line.insert(0, int(line.pop(1)))
+		line.insert(3, float(line.pop(3)[:-1]))
+		line.insert(4, int(line.pop(4)))
+		line.insert(5, float(line.pop(5)))
+		if line[2] in TORRENT_STATES:
+			line[2] = TORRENT_STATES[line[2]]
+		parsed_lines.append(line)
 	orders = ["%s%d" % ("-" if n == orderby and descending else "", n) for n in range(6)]
 	parsed_lines = sorted(parsed_lines, key=lambda l: l[orderby], reverse=descending)
 
