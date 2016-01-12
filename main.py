@@ -19,6 +19,26 @@ app.config.from_object(Config)
 
 database = Database.Database()
 
+torrent_list = []
+last_list = 0
+list_lock = threading.Lock()
+def fill_torrent_list():
+	while True:
+		global last_list
+		global torrent_list
+		with list_lock:
+			torrent_list = Utils.get_torrent_list()
+		since_last = time.time()-last_list
+		interval = app.config.get("LIST_INTERVAL", 4)
+		if last_list == 0 or since_last < interval:
+			sleep_time = interval-since_last
+			if last_list == 0:
+				sleep_time = interval
+			time.sleep(sleep_time)
+		last_list = time.time()
+list_thread = threading.Thread(target=fill_torrent_list)
+list_thread.daemon = True
+
 def is_authenticated():
 	with database:
 		return database.is_authenticated(
@@ -57,7 +77,8 @@ def index():
 		descending = False
 		orderby = orderby[1:]
 
-	lines = Utils.get_torrent_list()
+	with list_lock:
+		lines = torrent_list[:]
 	if not orderby or not orderby.isdigit() or int(orderby) >= len(lines)-1:
 		orderby = 0
 	else:
@@ -250,6 +271,7 @@ def users():
 		users[i] = user
 	return make_page("users.html", users=users)
 if __name__ == "__main__":
+	list_thread.start()
 	bindhost = app.config.get("BINDHOST", "127.0.0.1")
 	port = app.config.get("PORT", 5000)
 	debug = app.config.get("DEBUG", False)
