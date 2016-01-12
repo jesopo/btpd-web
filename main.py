@@ -27,6 +27,13 @@ def fill_torrent_list():
 		global last_list
 		global torrent_list
 		lines = Utils.get_torrent_list()
+		with database:
+			for i, line in enumerate(lines):
+				line = line.rsplit(None, 7)
+				owner = database.get_torrent_owner(
+					line[-1])
+				line.append(owner)
+				lines[i] = line
 		with list_lock:
 			torrent_list = lines
 		since_last = time.time()-last_list
@@ -70,6 +77,10 @@ def make_page(fragment, **kwargs):
 def index():
 	if not is_authenticated():
 		return login_redirect()
+	session = flask.request.cookies["btpd-session"]
+	with database:
+		admin = database.is_admin(session)
+		user_id = database.id_from_session(session)
 	referrer_params = get_referrer_params()
 	orderby = flask.request.args.get("orderby", "0")
 	descending = True
@@ -89,7 +100,8 @@ def index():
 	parsed_lines = []
 	failed = False
 	for line in lines[1:]:
-		line = line.rsplit(None, 7)
+		if not admin and not lines[-1] == user_id:
+			continue
 		line.insert(0, int(line.pop(1)))
 		line.insert(3, float(line.pop(3)[:-1]))
 		line.insert(4, int(line.pop(4)))

@@ -1,8 +1,9 @@
-import base64, os, sqlite3
+import base64, os, sqlite3, threading
 import scrypt
 
 class Database(object):
 	def __init__(self):
+		self.lock = threading.Lock()
 		self.database = None
 		self.cursor = None
 		self.location = "btpd-web.db"
@@ -17,6 +18,7 @@ class Database(object):
 				print("added root user.")
 				print("password: %s" % password)
 	def __enter__(self):
+		self.lock.acquire()
 		self.database = sqlite3.connect(self.location)
 		self.database.isolation_level = None
 		self.cursor = self.database.cursor()
@@ -25,6 +27,7 @@ class Database(object):
 			self.database.close()
 			self.database = None
 			self.cursor = None
+		self.lock.release()
 	def make_users_table(self):
 		try:
 			self.cursor.execute("""CREATE TABLE users (
@@ -136,4 +139,10 @@ class Database(object):
 			self.cursor.execute("""INSERT INTO torrents (
 				info_hash, id) VALUES (?, ?)""",
 				[info_hash, id])
+	def get_torrent_owner(self, info_hash):
+		self.cursor.execute(
+			"SELECT id FROM torrents WHERE info_hash=?",
+			[info_hash])
+		id = self.cursor.fetchone()
+		return (id or [None])[0]
 Database()
