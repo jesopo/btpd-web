@@ -102,6 +102,7 @@ def index():
 	for line in lines[1:]:
 		if not admin and not lines[-1] == user_id:
 			continue
+		line = line[:]
 		line.insert(0, int(line.pop(1)))
 		line.insert(3, float(line.pop(3)[:-1]))
 		line.insert(4, int(line.pop(4)))
@@ -186,6 +187,7 @@ def add():
 			database.add_torrent(info_hash, username)
 		return flask.redirect(flask.url_for("index"))
 	return make_page("add.html")
+
 @app.route("/remove")
 def remove():
 	if not is_authenticated():
@@ -225,6 +227,7 @@ def login():
 			else:
 				return make_page("login.html",
 					loginfailed=True)
+
 @app.route("/logout")
 def logout():
 	if is_authenticated():
@@ -232,47 +235,17 @@ def logout():
 			database.del_session(flask.request.cookies[
 				"btpd-session"])
 	return login_redirect()
+
 @app.route("/settings")
 def settings():
 	if not is_authenticated():
 		return login_redirect()
 	return make_page("settings.html")
-@app.route("/users", methods=["GET", "POST"])
+
+@app.route("/users")
 def users():
 	if not is_admin():
 		return flask.abort(400)
-	if "action" in flask.request.args:
-		if not flask.request.method == "POST":
-			return flask.abort(400)
-		action = flask.request.args["action"].lower()
-		if not action in USERS_ACTIONS:
-			return flask.abort(400)
-		if action == "add":
-			if not "username" in flask.request.args:
-				return make_page("adduser.html")
-			else:
-				username = flask.form.args["username"]
-				password = flask.form.args["password"]
-				admin = admin in flask.request.form
-				with database:
-					database.add_user(username,
-						password, admin)
-				return flask.redirect(flask.url_for(
-					"users"))
-		elif action == "delete":
-			id = flask.request.args["id"]
-			if "seriously" in flask.request.args:
-				if flask.request.args["seriously"] == "1":
-					with database:
-						database.del_user(id)
-					return flask.redirect(
-						flask.url_for("users"))
-			else:
-				with database:
-					username = database.username_from_id(
-						id)
-				return make_page("userdelete.html",
-					id=id, username=username)
 	with database:
 		users = database.list_users()
 	for i, user in enumerate(users):
@@ -280,6 +253,44 @@ def users():
 		user[2] = "✓" if user[2] == 1 else "✘"
 		users[i] = user
 	return make_page("users.html", users=users)
+
+@app.route("/adduser", methods=["GET", "POST"])
+def add_user():
+	if not is_admin():
+		return flask.abort(400)
+	if flask.request.method == "POST":
+		username = flask.request.form["username"]
+		password = flask.request.form["password"]
+		password_confirm = flask.request.form["passwordconfirm"]
+		admin = "admin" in flask.request.form
+		if not password == password_confirm:
+			return make_page("adduser.html",
+				usernamefield=username, failed=True)
+		with database:
+			database.add_user(username, password, admin)
+		return flask.redirect(flask.url_for("users"))
+	else:
+		return make_page("adduser.html")
+
+@app.route("/removeuser")
+def remove_user():
+	if not is_admin():
+		return flask.abort(400)
+	id = flask.request.args["id"]
+	if "seriously" in flask.request.args:
+		if flask.request.args["seriously"] == "1":
+			with database:
+				database.del_user(id)
+		return flask.redirect(flask.url_for(
+			"users"))
+	else:
+		with database:
+			username = database.username_from_id(id)
+		return make_page("userseriously.html",
+			id=id, target_username=username,
+			warning="Are you sure you want to remove"
+			"this user?")
+
 if __name__ == "__main__":
 	list_thread.start()
 	bindhost = app.config.get("BINDHOST", "127.0.0.1")

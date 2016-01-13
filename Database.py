@@ -3,7 +3,7 @@ import scrypt
 
 class Database(object):
 	def __init__(self):
-		self.lock = threading.Lock()
+		self.lock = threading.RLock()
 		self.database = None
 		self.cursor = None
 		self.location = "btpd-web.db"
@@ -100,7 +100,7 @@ class Database(object):
 			"SELECT COUNT(*) FROM users")
 		return self.cursor.fetchone()[0]
 	def username_from_id(self, id):
-		self.cursor.exeute(
+		self.cursor.execute(
 			"SELECT username FROM users WHERE id=?", [id])
 		username = self.cursor.fetchone()
 		return (username or [None])[0]

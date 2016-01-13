@@ -27,6 +27,10 @@ body {
 	border: 1px solid #000;
 	box-shadow: 0px 0px 12px 1px #111;
 }
+#maindiv > div {
+	margin-left: auto;
+	margin-right: auto;
+}
 #titlediv {
 	text-align: center;
 	padding: 10px 10px 0px 10px;
@@ -52,9 +56,6 @@ body {
 .torrentheadings > th {
 	padding: 0px 10px 5px 10px;
 }
-/*.torrent:last-child td {
-	border-bottom: 0;
-}*/
 .torrentname {
 	white-space: nowrap;
 	overflow: hidden;
@@ -99,8 +100,6 @@ a:hover {
 }
 #adddiv {
 	width: 280px;
-	margin-left: auto;
-	margin-right: auto;
 }
 #adddiv input {
 	box-sizing: border-box;
@@ -114,8 +113,6 @@ a:hover {
 }
 #seriouslydiv {
 	width: 300px;
-	margin-left: auto;
-	margin-right: auto
 }
 .seriouslytitle, .seriouslyquestion {
 	text-align: center;
@@ -145,12 +142,10 @@ a:hover {
 	text-align: center;
 	font-size: 1.3em;
 }
-#logindiv {
+#logindiv, #adduserdiv {
 	max-width: 250px;
-	margin-left: auto;
-	margin-right: auto;
 }
-#logindiv input {
+#logindiv input, #adduserdiv input {
 	box-sizing: border-box;
 	width: 100%;
 	margin-bottom: 5px;
@@ -160,6 +155,9 @@ a:hover {
 	color: #C22;
 	text-align: center;
 	margin-bottom: 5px;
+}
+#logindiv input:last-child, #adduserdiv input:last-child {
+	margin-bottom: 0px;
 }
 #torrentpagesdiv {
 	margin-top: 10px;
@@ -175,8 +173,6 @@ a:hover {
 }
 #userlistdiv {
 	width: 400px;
-	margin-left: auto;
-	margin-right: auto;
 }
 #userlistdiv table {
 	width: 100%;
@@ -218,4 +214,10 @@ a:hover {
 #ordiv {
 	text-align: center;
 	margin-bottom: 5px;
+}
+#adduserdiv input[type=checkbox] {
+	width: initial;
+}
+#adduserdiv span {
+	margin-left: 4px;
 }

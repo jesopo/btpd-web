@@ -4,14 +4,14 @@
 						<th>ID</th>
 						<th>Username</th>
 						<th>Admin</th>
-						<th><a href="users?action=add">+</a></th>
+						<th><a href="adduser">+</a></th>
 					</tr>
 					{% for user in users -%}
 					<tr>
 						<td class="userid">{{ user[0]|e }}</td>
 						<td class="username">{{ user[1]|e }}</td>
 						<td class="useradmin">{{ user[2]|e }}</td>
-						<td><a href="deluser?id={{ user[0]|e }}">✘</a></td>
+						<td><a href="removeuser?id={{ user[0]|e }}">✘</a></td>
 					</tr>
 					{%- endfor -%}
 				</table>
