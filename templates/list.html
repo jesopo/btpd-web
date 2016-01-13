@@ -9,14 +9,14 @@
 					<th><a class="torrentadd" href="add">+</a></th>
 				</tr>
 				{% for line in lines -%}
-				<tr class="torrent" id="torrent{{ line[0]|e }}">
-					<td class="torrentid"><a class="state{{ line[2]|e }}" href="action?id={{ line[0]|e }}&state={{ line[2]| e }}">{{ line[0]|e }}</a></td>
-					<td class="torrentname">{{ line[1]|e }}</td>
-					<td class="torrentstatus">{{ line[2]|e }}</td>
-					<td class="torrentpercent">{{ line[3]|e }}</td>
-					<td class="torrentsize">{{ line[4]|e }}</td>
-					<td class="torrentratio">{{ line[5]|e }}</td>
-					<td><a class="torrentremove" href="remove?id={{ line[0]|e }}">✘</a></td>
+				<tr class="torrent" id="torrent{{ line["id"]|e }}">
+					<td class="torrentid"><a class="state{{ line["state"]|e }}" href="action?id={{ line["id"]|e }}&state={{ line["state"]| e }}">{{ line["id"]|e }}</a></td>
+					<td class="torrentname">{{ line["name"]|e }}</td>
+					<td class="torrentstatus">{{ line["state"]|e }}</td>
+					<td class="torrentpercent">{{ line["percent"]|e }}</td>
+					<td class="torrentsize">{{ line["size"]|e }}</td>
+					<td class="torrentratio">{{ line["ratio"]|e }}</td>
+					<td><a class="torrentremove" href="remove?id={{ line["id"]|e }}">✘</a></td>
 				</tr>
 				{% endfor %}
 			</table>

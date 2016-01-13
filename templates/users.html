@@ -11,7 +11,7 @@
 						<td class="userid">{{ user[0]|e }}</td>
 						<td class="username">{{ user[1]|e }}</td>
 						<td class="useradmin">{{ user[2]|e }}</td>
-						<td><a href="removeuser?id={{ user[0]|e }}">✘</a></td>
+						<td>{% if not user[1] == "root" %}<a href="removeuser?id={{ user[0]|e }}">✘</a>{% endif %}</td>
 					</tr>
 					{%- endfor -%}
 				</table>

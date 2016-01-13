@@ -1,18 +1,16 @@
 #!/usr/bin/env python3
 
-import argparse, base64, codecs, datetime, hashlib, os
-import subprocess, sqlite3, threading, time
+import copy, argparse, base64, codecs, datetime, hashlib
+import os, subprocess, sqlite3, threading, time
 import flask, scrypt, libtorrent, werkzeug
 import Config, Database, Utils
 
 TORRENT_STATES = {"S": "seed", "I": "idle", "L": "leech", "+": "starting"}
 TORRENT_ACTIONS = {"seed": "stop", "idle": "start", "leech": "stop", "starting": "stop"}
 
-HEADINGS= ["ID", "Name", "Status", "Percent", "Size", "Ratio"]
+HEADINGS= ["ID", "Name", "State", "Percent", "Size", "Ratio"]
 ARROW_DOWN = "▾"
 ARROW_UP = "▴"
-
-USERS_ACTIONS = ["delete", "add"]
 
 app = flask.Flask(__name__)
 app.config.from_object(Config)
@@ -32,8 +30,15 @@ def fill_torrent_list():
 				line = line.rsplit(None, 7)
 				owner = database.get_torrent_owner(
 					line[-1])
-				line.append(owner)
-				lines[i] = line
+				torrent = {"owner": owner, "name": line[0],
+					"id": int(line[1]), "state": line[2],
+					"percent": float(line[3][:-1]), "bytes":
+					int(line[4]), "ratio": float(line[5]),
+					"size": line[6], "info_hash": line[7]}
+				if torrent["state"] in TORRENT_STATES:
+					torrent["state"] = TORRENT_STATES[
+						torrent["state"]]
+				lines[i] = torrent
 		with list_lock:
 			torrent_list = lines
 		since_last = time.time()-last_list
@@ -90,28 +95,23 @@ def index():
 		orderby = orderby[1:]
 
 	with list_lock:
-		lines = torrent_list[:]
-	if not orderby or not orderby.isdigit() or int(orderby) >= len(lines)-1:
+		parsed_lines = copy.deepcopy(torrent_list)
+	if not orderby or not orderby.isdigit() or int(orderby) >= len(parsed_lines)-1:
 		orderby = 0
 	else:
 		orderby = int(orderby)
+
 	arrow = ARROW_DOWN if descending else ARROW_UP
 	headings[orderby] = "%s %s" % (headings[orderby], arrow)
-	parsed_lines = []
 	failed = False
-	for line in lines[1:]:
-		if not admin and not lines[-1] == user_id:
+	for i, line in enumerate(parsed_lines):
+		if not admin and not line["owner"] == user_id:
 			continue
-		line = line[:]
-		line.insert(0, int(line.pop(1)))
-		line.insert(3, float(line.pop(3)[:-1]))
-		line.insert(4, int(line.pop(4)))
-		line.insert(5, float(line.pop(5)))
-		if line[2] in TORRENT_STATES:
-			line[2] = TORRENT_STATES[line[2]]
-		parsed_lines.append(line)
-	orders = ["%s%d" % ("-" if n == orderby and descending else "", n) for n in range(6)]
-	parsed_lines = sorted(parsed_lines, key=lambda l: l[orderby], reverse=descending)
+		parsed_lines[i] = line
+	orders = ["%s%d" % ("-" if n == orderby and descending else "",
+		n) for n in range(6)]
+	parsed_lines = sorted(parsed_lines, key=lambda l: l[HEADINGS[
+		orderby].lower()], reverse=descending)
 
 	page = int(flask.request.args.get("page", 1))-1
 	next_page = page+1
@@ -122,9 +122,8 @@ def index():
 		]*page:app.config["PER_PAGE"]*next_page]
 
 	for n, line in enumerate(parsed_lines):
-		line[3] = "%.1f%%" % line[3]
-		line[4] = line.pop(6)
-		line[5] = "%.2f" % line[5]
+		line["percent"] = "%.1f%%" % line["percent"]
+		line["ratio"] = "%.2f" % line["ratio"]
 		parsed_lines[n] = line
 	return make_page("list.html", failed=failed, lines=parsed_lines,
 		orders=orders, headings=headings, pages=pages, page=page,
@@ -245,7 +244,7 @@ def settings():
 @app.route("/users")
 def users():
 	if not is_admin():
-		return flask.abort(400)
+		return login_redirect()
 	with database:
 		users = database.list_users()
 	for i, user in enumerate(users):
@@ -257,7 +256,7 @@ def users():
 @app.route("/adduser", methods=["GET", "POST"])
 def add_user():
 	if not is_admin():
-		return flask.abort(400)
+		return login_redirect()
 	if flask.request.method == "POST":
 		username = flask.request.form["username"]
 		password = flask.request.form["password"]
@@ -275,7 +274,7 @@ def add_user():
 @app.route("/removeuser")
 def remove_user():
 	if not is_admin():
-		return flask.abort(400)
+		return login_redirect()
 	id = flask.request.args["id"]
 	if "seriously" in flask.request.args:
 		if flask.request.args["seriously"] == "1":

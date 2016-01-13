@@ -22,6 +22,7 @@ class Database(object):
 		self.database = sqlite3.connect(self.location)
 		self.database.isolation_level = None
 		self.cursor = self.database.cursor()
+		self.cursor.execute("PRAGMA foreign_keys=ON")
 	def __exit__(self, type, value, traceback):
 		if self.database:
 			self.database.close()
