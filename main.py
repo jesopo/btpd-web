@@ -20,6 +20,7 @@ database = Database.Database()
 torrent_list = []
 last_list = 0
 list_lock = threading.Lock()
+list_condition = threading.Condition()
 def fill_torrent_list():
 	while True:
 		global last_list
@@ -47,7 +48,8 @@ def fill_torrent_list():
 			sleep_time = interval-since_last
 			if last_list == 0:
 				sleep_time = interval
-			time.sleep(sleep_time)
+			with list_condition:
+				list_condition.wait(sleep_time)
 		last_list = time.time()
 list_thread = threading.Thread(target=fill_torrent_list)
 list_thread.daemon = True
@@ -139,6 +141,8 @@ def torrent_action():
 	if not id.isdigit() or not state in TORRENT_ACTIONS:
 		return flask.abort(400)
 	Utils.do_torrent_action(id, TORRENT_ACTIONS[state])
+	with list_condition:
+		list_condition.notify()
 	if not flask.request.is_xhr:
 		return flask.redirect("%s%s" % (flask.url_for("index"), referrer_params))
 	return "0" if out else "1"
@@ -179,6 +183,8 @@ def add():
 
 		Utils.add_torrent(directory, filename, idle)
 		os.remove(filename)
+		with list_condition:
+			list_condition.notify()
 
 		with database:
 			username = database.username_from_session(
@@ -195,6 +201,8 @@ def remove():
 	if "seriously" in flask.request.args:
 		if flask.request.args["seriously"] == "1":
 			Utils.remove_torrent(id)
+		with list_condition:
+			list_condition.notify()
 		return flask.redirect(flask.url_for("index"))
 	else:
 		title = Utils.get_torrent_title(id)
