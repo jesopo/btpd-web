@@ -116,7 +116,6 @@ def index():
 
 	arrow = ARROW_DOWN if descending else ARROW_UP
 	headings[orderby] = "%s %s" % (headings[orderby], arrow)
-	failed = False
 	for i, line in enumerate(parsed_lines):
 		if not admin and not line["owner"] == user_id:
 			continue
@@ -138,9 +137,8 @@ def index():
 		line["percent"] = "%.1f%%" % line["percent"]
 		line["ratio"] = "%.2f" % line["ratio"]
 		parsed_lines[n] = line
-	return make_page("list.html", failed=failed, lines=parsed_lines,
-		orders=orders, headings=headings, pages=pages, page=page,
-		orderby=orderby)
+	return make_page("list.html", lines=parsed_lines, orders=orders,
+		headings=headings, pages=pages, page=page, orderby=orderby)
 
 @app.route("/action")
 def torrent_action():
@@ -162,7 +160,6 @@ def torrent_action():
 def add():
 	if not is_authenticated():
 		return login_redirect()
-	failed = False
 	if flask.request.method == "POST":
 		directory = flask.request.form["directory"]
 		if directory.startswith("/"):
@@ -288,7 +285,8 @@ def add_user():
 		admin = "admin" in flask.request.form
 		if not password == password_confirm:
 			return make_page("adduser.html",
-				usernamefield=username, failed=True)
+				usernamefield=username,
+				adduserfailed=True)
 		with database:
 			database.add_user(username, password, admin)
 		return flask.redirect(flask.url_for("users"))

@@ -138,10 +138,6 @@ a:hover {
 #seriouslybuttons {
 	margin-top: 10px;
 }
-#connectionfaileddiv {
-	text-align: center;
-	font-size: 1.3em;
-}
 #logindiv, #adduserdiv {
 	max-width: 250px;
 }
@@ -150,7 +146,7 @@ a:hover {
 	width: 100%;
 	margin-bottom: 5px;
 }
-#loginfaileddiv {
+#loginfaileddiv, #adduserfaileddiv, #connectfaileddiv {
 	font-size: 1.2em;
 	color: #C22;
 	text-align: center;
