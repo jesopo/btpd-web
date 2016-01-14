@@ -43,6 +43,12 @@ def fill_torrent_list():
 					torrent["state"] = TORRENT_STATES[
 						torrent["state"]]
 				torrents[torrent["id"]] = torrent
+		removed = set(torrent["info_hash"
+			] for torrent in torrent_list.values())-set(torrent[
+			"info_hash"] for torrent in torrents.values())
+		for info_hash in removed:
+			with database:
+				database.del_torrent(info_hash)
 		with list_lock:
 			torrent_list = torrents
 		since_last = time.time()-last_list
