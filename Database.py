@@ -11,7 +11,7 @@ class Database(object):
 			self.make_users_table()
 			self.make_sessions_table()
 			self.make_torrents_table()
-			if self.user_count() == 0:
+			if not self.has_username("root"):
 				password = base64.b64encode(
 					os.urandom(16)).decode("utf8")
 				self.add_user("root", password, True)
@@ -94,12 +94,19 @@ class Database(object):
 			username, hash, salt, admin) VALUES (?, ?, ?,
 			?, ?)""", [None, username, hash, salt, admin])
 	def del_user(self, id):
+		assert id != 1
 		self.cursor.execute(
 			"DELETE FROM users WHERE id=?", [id])
 	def user_count(self):
 		self.cursor.execute(
 			"SELECT COUNT(*) FROM users")
 		return self.cursor.fetchone()[0]
+	def has_username(self, username):
+		self.cursor.execute(
+			"SELECT 1 FROM users WHERE username=?",
+			[username])
+		result = self.cursor.fetchone()
+		return (result or [None])[0] == 1
 	def username_from_id(self, id):
 		self.cursor.execute(
 			"SELECT username FROM users WHERE id=?", [id])

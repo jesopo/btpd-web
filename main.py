@@ -31,6 +31,8 @@ def fill_torrent_list():
 				line = line.rsplit(None, 7)
 				owner = database.get_torrent_owner(
 					line[-1])
+				if not owner:
+					database.add_torrent(line[-1], "root")
 				torrent = {"owner": owner, "name": line[0],
 					"id": int(line[1]), "state": line[2],
 					"percent": float(line[3][:-1]), "bytes":
