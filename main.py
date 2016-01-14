@@ -17,7 +17,7 @@ app.config.from_object(Config)
 
 database = Database.Database()
 
-torrent_list = []
+torrent_list = {}
 last_list = 0
 list_lock = threading.Lock()
 list_condition = threading.Condition()
@@ -26,6 +26,7 @@ def fill_torrent_list():
 		global last_list
 		global torrent_list
 		lines = Utils.get_torrent_list()
+		torrents = {}
 		with database:
 			for i, line in enumerate(lines):
 				line = line.rsplit(None, 7)
@@ -41,9 +42,9 @@ def fill_torrent_list():
 				if torrent["state"] in TORRENT_STATES:
 					torrent["state"] = TORRENT_STATES[
 						torrent["state"]]
-				lines[i] = torrent
+				torrents[torrent["id"]] = torrent
 		with list_lock:
-			torrent_list = lines
+			torrent_list = torrents
 		since_last = time.time()-last_list
 		interval = app.config.get("LIST_INTERVAL", 4)
 		if last_list == 0 or since_last < interval:
@@ -99,8 +100,10 @@ def index():
 		orderby = orderby[1:]
 
 	with list_lock:
-		parsed_lines = copy.deepcopy(torrent_list)
-	if not orderby or not orderby.isdigit() or int(orderby) >= len(parsed_lines)-1:
+		parsed_lines = copy.deepcopy(list(
+			torrent_list.values()))
+	if not orderby or not orderby.isdigit() or int(orderby
+			) >= len(parsed_lines)-1:
 		orderby = 0
 	else:
 		orderby = int(orderby)
@@ -201,13 +204,18 @@ def remove():
 		return login_redirect()
 	id = flask.request.args["id"]
 	if "seriously" in flask.request.args:
+		with list_lock:
+			info_hash = torrent_list[int(id)]["info_hash"]
 		if flask.request.args["seriously"] == "1":
+			with database:
+				database.del_torrent(info_hash)
 			Utils.remove_torrent(id)
 		with list_condition:
 			list_condition.notify()
 		return flask.redirect(flask.url_for("index"))
 	else:
-		title = Utils.get_torrent_title(id)
+		with list_lock:
+			title = torrent_list[int(id)]["name"]
 		return make_page("seriously.html", id=id, title=title,
 			warning="Are you sure you want to remove this torrent?")
 

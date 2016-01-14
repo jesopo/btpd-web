@@ -147,6 +147,10 @@ class Database(object):
 			self.cursor.execute("""INSERT INTO torrents (
 				info_hash, id) VALUES (?, ?)""",
 				[info_hash, id])
+	def del_torrent(self, info_hash):
+		self.cursor.execute(
+			"DELETE FROM torrrents WHERE info_hash=?",
+			[info_hash])
 	def get_torrent_owner(self, info_hash):
 		self.cursor.execute(
 			"SELECT id FROM torrents WHERE info_hash=?",
