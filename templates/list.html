@@ -6,6 +6,7 @@
 					<th><a class="torrentheading" href="?orderby={{ orders[3] }}">{{ headings[3] }}</a></th>
 					<th><a class="torrentheading" href="?orderby={{ orders[4] }}">{{ headings[4] }}</a></th>
 					<th><a class="torrentheading" href="?orderby={{ orders[5] }}">{{ headings[5] }}</a></th>
+					<th><a class="torrentheading" href="?orderby={{ orders[6] }}">{{ headings[6] }}</a></th>
 					<th><a class="torrentadd" href="add">+</a></th>
 				</tr>
 				{% for line in lines -%}
@@ -16,6 +17,7 @@
 					<td class="torrentpercent">{{ line["percent"]|e }}</td>
 					<td class="torrentsize">{{ line["size"]|e }}</td>
 					<td class="torrentratio">{{ line["ratio"]|e }}</td>
+					<td class="torrentowner">{{ line["owner_username"]|e }}</td>
 					<td><a class="torrentremove" href="remove?id={{ line["id"]|e }}">✘</a></td>
 				</tr>
 				{% endfor %}

@@ -3,7 +3,7 @@
 				<div id="adduserfaileddiv">Passwords do not match.</div>
 				{%- endif %}
 				<form action="adduser" method="post">
-					<input placeholder="Username" type="text" name="username" value="{{ usernamefield }}">
+					<input id="takefocus" placeholder="Username" type="text" name="username" value="{{ usernamefield }}">
 					<input placeholder="Password" type="password" name="password">
 					<input placeholder="Password confirmation" type="password" name="passwordconfirm">
 					<input type="checkbox" name="admin" value="Yes"><span>Admin?</span>

@@ -8,7 +8,7 @@ import Config, Database, Utils
 TORRENT_STATES = {"S": "seed", "I": "idle", "L": "leech", "+": "starting"}
 TORRENT_ACTIONS = {"seed": "stop", "idle": "start", "leech": "stop", "starting": "stop"}
 
-HEADINGS= ["ID", "Name", "State", "Percent", "Size", "Ratio"]
+HEADINGS= ["ID", "Name", "State", "Percent", "Size", "Ratio", "Uploader"]
 ARROW_DOWN = "▾"
 ARROW_UP = "▴"
 
@@ -27,22 +27,27 @@ def fill_torrent_list():
 		global torrent_list
 		lines = Utils.get_torrent_list()
 		torrents = {}
-		with database:
-			for i, line in enumerate(lines):
-				line = line.rsplit(None, 7)
+		for i, line in enumerate(lines):
+			line = line.rsplit(None, 7)
+			with database:
 				owner = database.get_torrent_owner(
 					line[-1])
 				if not owner:
-					database.add_torrent(line[-1], "root")
-				torrent = {"owner": owner, "name": line[0],
-					"id": int(line[1]), "state": line[2],
-					"percent": float(line[3][:-1]), "bytes":
-					int(line[4]), "ratio": float(line[5]),
-					"size": line[6], "info_hash": line[7]}
-				if torrent["state"] in TORRENT_STATES:
-					torrent["state"] = TORRENT_STATES[
-						torrent["state"]]
-				torrents[torrent["id"]] = torrent
+					database.add_torrent(line[-1],
+						"root")
+					owner = 1
+				owner_username = database.username_from_id(
+					owner)
+			torrent = {"owner": owner, "name": line[0],
+				"id": int(line[1]), "state": line[2],
+				"percent": float(line[3][:-1]), "bytes":
+				int(line[4]), "ratio": float(line[5]),
+				"size": line[6], "info_hash": line[7],
+				"owner_username": owner_username}
+			if torrent["state"] in TORRENT_STATES:
+				torrent["state"] = TORRENT_STATES[
+					torrent["state"]]
+			torrents[torrent["id"]] = torrent
 		removed = set(torrent["info_hash"
 			] for torrent in torrent_list.values())-set(torrent[
 			"info_hash"] for torrent in torrents.values())
@@ -184,7 +189,7 @@ def add():
 		torrent = libtorrent.bdecode(open(filename, "rb"
 			).read())
 		info_hash = codecs.encode(libtorrent.torrent_info(torrent
-			).info_hash().to_bytes(), "hex")
+			).info_hash().to_bytes(), "hex").decode("utf8")
 
 		idle = "idle" in flask.request.form
 		directory = os.path.join(app.config["BASEDIR"], directory)
