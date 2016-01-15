@@ -127,8 +127,12 @@ def index():
 		parsed_lines[i] = line
 	orders = ["%s%d" % ("-" if n == orderby and descending else "",
 		n) for n in range(7)]
+	if not orderby == 0:
+		parsed_lines = sorted(parsed_lines,
+			key=lambda l: l[HEADINGS[0].lower()],
+			reverse=descending)
 	parsed_lines = sorted(parsed_lines, key=lambda l: l[HEADINGS[
-		orderby].lower()], reverse=descending)
+		orderby].lower()].title(), reverse=descending)
 
 	page = int(flask.request.args.get("page", 1))-1
 	next_page = page+1
