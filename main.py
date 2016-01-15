@@ -127,7 +127,7 @@ def index():
 			continue
 		parsed_lines[i] = line
 	orders = ["%s%d" % ("-" if n == orderby and descending else "",
-		n) for n in range(7)]
+		n) for n in range(len(HEADINGS))]
 	if not orderby == 0:
 		parsed_lines = sorted(parsed_lines,
 			key=lambda l: l[HEADINGS[0].lower()],
