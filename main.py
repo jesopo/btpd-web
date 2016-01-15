@@ -43,7 +43,7 @@ def fill_torrent_list():
 				"percent": float(line[3][:-1]), "bytes":
 				int(line[4]), "ratio": float(line[5]),
 				"size": line[6], "info_hash": line[7],
-				"owner_username": owner_username}
+				"uploader": owner_username}
 			if torrent["state"] in TORRENT_STATES:
 				torrent["state"] = TORRENT_STATES[
 					torrent["state"]]
@@ -126,7 +126,7 @@ def index():
 			continue
 		parsed_lines[i] = line
 	orders = ["%s%d" % ("-" if n == orderby and descending else "",
-		n) for n in range(6)]
+		n) for n in range(7)]
 	parsed_lines = sorted(parsed_lines, key=lambda l: l[HEADINGS[
 		orderby].lower()], reverse=descending)
 
@@ -157,9 +157,8 @@ def torrent_action():
 	Utils.do_torrent_action(id, TORRENT_ACTIONS[state])
 	with list_condition:
 		list_condition.notify()
-	if not flask.request.is_xhr:
-		return flask.redirect("%s%s" % (flask.url_for("index"), referrer_params))
-	return "0" if out else "1"
+	return flask.redirect("%s%s" % (flask.url_for("index"),
+		referrer_params))
 
 @app.route("/add", methods=["GET", "POST"])
 def add():
