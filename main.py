@@ -38,12 +38,13 @@ def fill_torrent_list():
 					owner = 1
 				owner_username = database.username_from_id(
 					owner)
-			torrent = {"owner": owner, "name": line[0],
+			torrent = {"owner": owner, "name": line[0].lower(),
 				"id": int(line[1]), "state": line[2],
 				"percent": float(line[3][:-1]), "bytes":
 				int(line[4]), "ratio": float(line[5]),
 				"size": line[6], "info_hash": line[7],
-				"uploader": owner_username}
+				"uploader": owner_username, "title":
+				line[0]}
 			if torrent["state"] in TORRENT_STATES:
 				torrent["state"] = TORRENT_STATES[
 					torrent["state"]]
@@ -132,7 +133,7 @@ def index():
 			key=lambda l: l[HEADINGS[0].lower()],
 			reverse=descending)
 	parsed_lines = sorted(parsed_lines, key=lambda l: l[HEADINGS[
-		orderby].lower()].title(), reverse=descending)
+		orderby].lower()], reverse=descending)
 
 	page = int(flask.request.args.get("page", 1))-1
 	next_page = page+1
