@@ -87,14 +87,13 @@ def get_referrer_params():
 			return "?%s" % referrer_params[1]
 	return ""
 def make_page(fragment, **kwargs):
-	username = None
-	admin = False
 	session = flask.request.cookies.get("btpd-session")
 	with database:
-		username = database.username_from_session(session)
-		admin = database.is_admin(session)
+		user_username = database.username_from_session(session)
+		user_admin = database.is_admin(session)
 	return flask.render_template("index.html", fragment=fragment,
-		username=username, admin=admin, **kwargs)
+		user_username=user_username, user_admin=user_admin,
+		**kwargs)
 @app.route("/")
 def index():
 	if not is_authenticated():
@@ -228,7 +227,7 @@ def remove():
 		return flask.redirect(flask.url_for("index"))
 	else:
 		with list_lock:
-			title = torrent_list[int(id)]["name"]
+			title = torrent_list[int(id)]["title"]
 		return make_page("seriously.html", id=id, title=title,
 			warning="Are you sure you want to remove this torrent?")
 
