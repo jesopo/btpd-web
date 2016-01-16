@@ -112,20 +112,21 @@ def index():
 		orderby = orderby[1:]
 
 	with list_lock:
-		parsed_lines = copy.deepcopy(list(
+		non_parsed_lines = copy.deepcopy(list(
 			torrent_list.values()))
 	if not orderby or not orderby.isdigit() or int(orderby
-			) >= len(parsed_lines)-1:
+			) >= len(non_parsed_lines)-1:
 		orderby = 0
 	else:
 		orderby = int(orderby)
 
 	arrow = ARROW_DOWN if descending else ARROW_UP
 	headings[orderby] = "%s %s" % (headings[orderby], arrow)
-	for i, line in enumerate(parsed_lines):
+	parsed_lines = []
+	for line in non_parsed_lines:
 		if not admin and not line["owner"] == user_id:
 			continue
-		parsed_lines[i] = line
+		parsed_lines.append(line)
 	orders = ["%s%d" % ("-" if n == orderby and descending else "",
 		n) for n in range(len(HEADINGS))]
 	if not orderby == 0:
@@ -269,6 +270,19 @@ def logout():
 def settings():
 	if not is_authenticated():
 		return login_redirect()
+	admin = is_admin()
+	id = flask.request.args.get("id", "")
+	if not id.isdigit():
+		id = None
+	with database:
+		own_id = database.id_from_session(flask.request.cookies[
+			"btpd-session"])
+		if not id:
+			id = own_id
+		username = database.username_from_id(
+			id)
+	if (not admin and not id == own_id) or not username:
+		return flask.abort(400)
 	return make_page("settings.html")
 
 @app.route("/users")
@@ -319,7 +333,7 @@ def remove_user():
 		return make_page("userseriously.html",
 			id=id, target_username=username,
 			warning="Are you sure you want to remove"
-			"this user?")
+			" this user?")
 
 if __name__ == "__main__":
 	list_thread.start()

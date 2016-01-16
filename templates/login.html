@@ -1,10 +1,10 @@
 			<div id="logindiv">
+				{% if loginfailed -%}
+				<div id="loginfaileddiv">Login failed.</div>
+				{%- endif %}
 				<form id="loginform" action="login" method="POST">
 					<input id="takefocus" type="text" name="username" placeholder="Username" />
 					<input type="password" name="password" placeholder="Password" />
 					<input type="submit" value="Login" />
 				</form>
-				{% if loginfailed -%}
-				<div id="loginfaileddiv">Login failed.</div>
-				{%- endif %}
 			</div>
