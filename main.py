@@ -294,10 +294,14 @@ def users():
 		return login_redirect()
 	with database:
 		users = database.list_users()
-	for i, user in enumerate(users):
-		user = list(user)
-		user[2] = "✓" if user[2] == 1 else "✘"
-		users[i] = user
+		for i, user in enumerate(users):
+			user_dict = {}
+			user_dict["id"] = user[0]
+			user_dict["username"] = user[1]
+			user_dict["admin"] = "✓" if user[2] == 1 else "✘"
+			user_dict["torrent_count"] = database.torrent_count(
+				user_dict["id"])
+			users[i] = user_dict
 	return make_page("users.html", users=users)
 
 @app.route("/adduser", methods=["GET", "POST"])

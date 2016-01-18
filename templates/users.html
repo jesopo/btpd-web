@@ -4,14 +4,16 @@
 						<th>ID</th>
 						<th>Username</th>
 						<th>Admin</th>
+						<th>Torrent count</th>
 						<th><a href="adduser">+</a></th>
 					</tr>
 					{% for user in users -%}
 					<tr>
-						<td class="userid">{{ user[0]|e }}</td>
-						<td class="username"><a href="settings?id={{ user[0]|e }}">{{ user[1]|e }}</a></td>
-						<td class="useradmin">{{ user[2]|e }}</td>
-						<td class="userdel">{% if not user[1] == "root" %}<a href="removeuser?id={{ user[0]|e }}">✘</a>{% endif %}</td>
+						<td class="userid">{{ user["id"]|e }}</td>
+						<td class="username"><a href="settings?id={{ user["id"]|e }}">{{ user["username"]|e }}</a></td>
+						<td class="useradmin">{{ user["admin"]|e }}</td>
+						<td class="usertorrents">{{ user["torrent_count"]|e }}</td>
+						<td class="userdel">{% if not user["id"] == 1 %}<a href="removeuser?id={{ user["id"]|e }}">✘</a>{% endif %}</td>
 					</tr>
 					{%- endfor -%}
 				</table>
