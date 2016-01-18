@@ -1,6 +1,6 @@
 			<div id="adduserdiv">
 				{% if adduserfailed -%}
-				<div id="adduserfaileddiv">Passwords do not match.</div>
+				<div id="adduserfaileddiv">{{ warning|e }}</div>
 				{%- endif %}
 				<form action="adduser" method="post">
 					<input id="takefocus" placeholder="Username" type="text" name="username" value="{{ usernamefield }}">

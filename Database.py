@@ -103,8 +103,8 @@ class Database(object):
 		return self.cursor.fetchone()[0]
 	def has_username(self, username):
 		self.cursor.execute(
-			"SELECT 1 FROM users WHERE username=?",
-			[username])
+			"SELECT 1 FROM users WHERE UPPER(username)=?",
+			[username.upper()])
 		result = self.cursor.fetchone()
 		return (result or [None])[0] == 1
 	def username_from_id(self, id):

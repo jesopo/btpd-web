@@ -313,10 +313,17 @@ def add_user():
 		password = flask.request.form["password"]
 		password_confirm = flask.request.form["passwordconfirm"]
 		admin = "admin" in flask.request.form
+		with database:
+			if database.has_username(username):
+				return make_page("adduser.html",
+					usernamefield=username,
+					adduserfailed=True,
+					warning="Username already in use")
 		if not password == password_confirm:
 			return make_page("adduser.html",
 				usernamefield=username,
-				adduserfailed=True)
+				adduserfailed=True,
+				warning="Passwords do not match")
 		with database:
 			database.add_user(username, password, admin)
 		return flask.redirect(flask.url_for("users"))
