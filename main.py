@@ -25,7 +25,10 @@ def fill_torrent_list():
 	while True:
 		global last_list
 		global torrent_list
-		lines = Utils.get_torrent_list()
+		try:
+			lines = Utils.get_torrent_list()
+		except:
+			continue
 		torrents = {}
 		for i, line in enumerate(lines):
 			line = line.rsplit(None, 7)
@@ -40,9 +43,9 @@ def fill_torrent_list():
 					owner)
 			torrent = {"owner": owner, "name": line[0].lower(),
 				"id": int(line[1]), "state": line[2],
-				"percent": float(line[3][:-1]), "bytes":
+				"percent": float(line[3][:-1]), "size":
 				int(line[4]), "ratio": float(line[5]),
-				"size": line[6], "info_hash": line[7],
+				"pretty_size": line[6], "info_hash": line[7],
 				"uploader": owner_username, "title":
 				line[0]}
 			if torrent["state"] in TORRENT_STATES:
@@ -148,7 +151,8 @@ def index():
 		line["ratio"] = "%.2f" % line["ratio"]
 		parsed_lines[n] = line
 	return make_page("list.html", lines=parsed_lines, orders=orders,
-		headings=headings, pages=pages, page=page, orderby=orderby)
+		headings=headings, pages=pages, page=page,
+		orderby=flask.request.args.get("orderby", 0))
 
 @app.route("/action")
 def torrent_action():

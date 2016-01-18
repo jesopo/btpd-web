@@ -157,4 +157,13 @@ class Database(object):
 			[info_hash])
 		id = self.cursor.fetchone()
 		return (id or [None])[0]
+	def torrent_count(self, id=None):
+		command = "SELECT COUNT(*) FROM torrents"
+		args = []
+		if id:
+			command += " WHERE id=?"
+			args = [id]
+		self.cursor.execute(command, args)
+		count = self.cursor.fetchone()
+		return (count or [0])[0]
 Database()

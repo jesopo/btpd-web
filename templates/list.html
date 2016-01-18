@@ -15,7 +15,7 @@
 					<td class="torrentname">{{ line["title"]|e }}</td>
 					<td class="torrentstatus">{{ line["state"]|e }}</td>
 					<td class="torrentpercent">{{ line["percent"]|e }}</td>
-					<td class="torrentsize">{{ line["size"]|e }}</td>
+					<td class="torrentsize">{{ line["pretty_size"]|e }}</td>
 					<td class="torrentratio">{{ line["ratio"]|e }}</td>
 					<td class="torrentowner">{{ line["uploader"]|e }}</td>
 					<td><a class="torrentremove" href="remove?id={{ line["id"]|e }}">✘</a></td>
