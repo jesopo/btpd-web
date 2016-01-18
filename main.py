@@ -32,15 +32,12 @@ def fill_torrent_list():
 		torrents = {}
 		for i, line in enumerate(lines):
 			line = line.rsplit(None, 7)
-			with database:
-				owner = database.get_torrent_owner(
-					line[-1])
-				if not owner:
-					database.add_torrent(line[-1],
-						"root")
-					owner = 1
-				owner_username = database.username_from_id(
-					owner)
+			owner = database.get_torrent_owner(line[-1])
+			if not owner:
+				database.add_torrent(line[-1], "root")
+				owner = 1
+			owner_username = database.username_from_id(
+				owner)
 			torrent = {"owner": owner, "name": line[0].lower(),
 				"id": int(line[1]), "state": line[2],
 				"percent": float(line[3][:-1]), "size":
@@ -56,8 +53,7 @@ def fill_torrent_list():
 			] for torrent in torrent_list.values())-set(torrent[
 			"info_hash"] for torrent in torrents.values())
 		for info_hash in removed:
-			with database:
-				database.del_torrent(info_hash)
+			database.del_torrent(info_hash)
 		with list_lock:
 			torrent_list = torrents
 		since_last = time.time()-last_list
@@ -73,14 +69,10 @@ list_thread = threading.Thread(target=fill_torrent_list)
 list_thread.daemon = True
 
 def is_authenticated():
-	with database:
-		return database.is_authenticated(
-			flask.request.cookies.get(
-			"btpd-session"))
+	return database.is_authenticated(
+		flask.request.cookies.get("btpd-session"))
 def is_admin():
-	with database:
-		return database.is_admin(flask.request.cookies[
-			"btpd-session"])
+	return database.is_admin(flask.request.cookies["btpd-session"])
 def login_redirect():
 	return flask.redirect(flask.url_for("login"))
 def get_referrer_params():
@@ -91,9 +83,8 @@ def get_referrer_params():
 	return ""
 def make_page(fragment, **kwargs):
 	session = flask.request.cookies.get("btpd-session")
-	with database:
-		user_username = database.username_from_session(session)
-		user_admin = database.is_admin(session)
+	user_username = database.username_from_session(session)
+	user_admin = database.is_admin(session)
 	return flask.render_template("index.html", fragment=fragment,
 		user_username=user_username, user_admin=user_admin,
 		**kwargs)
@@ -102,9 +93,8 @@ def index():
 	if not is_authenticated():
 		return login_redirect()
 	session = flask.request.cookies["btpd-session"]
-	with database:
-		admin = database.is_admin(session)
-		user_id = database.id_from_session(session)
+	admin = database.is_admin(session)
+	user_id = database.id_from_session(session)
 	referrer_params = get_referrer_params()
 	orderby = flask.request.args.get("orderby", "0")
 	descending = True
@@ -207,10 +197,9 @@ def add():
 		with list_condition:
 			list_condition.notify()
 
-		with database:
-			username = database.username_from_session(
-				flask.request.cookies["btpd-session"])
-			database.add_torrent(info_hash, username)
+		username = database.username_from_session(
+			flask.request.cookies["btpd-session"])
+		database.add_torrent(info_hash, username)
 		return flask.redirect(flask.url_for("index"))
 	return make_page("add.html")
 
@@ -244,29 +233,27 @@ def login():
 	elif flask.request.method == "POST":
 		username = flask.request.form["username"]
 		password = flask.request.form["password"]
-		with database:
-			if database.authenticate(username, password):
-				session = database.make_session()
-				database.add_session(username, session)
-				response = flask.make_response(
-					flask.redirect(flask.url_for(
-					"index")))
-				expiration = datetime.datetime.now()
-				expiration += datetime.timedelta(
-					days=90)
-				response.set_cookie("btpd-session",
-					session, expires=expiration)
-				return response
-			else:
-				return make_page("login.html",
-					loginfailed=True)
+		if database.authenticate(username, password):
+			session = database.make_session()
+			database.add_session(username, session)
+			response = flask.make_response(
+				flask.redirect(flask.url_for(
+				"index")))
+			expiration = datetime.datetime.now()
+			expiration += datetime.timedelta(
+				days=90)
+			response.set_cookie("btpd-session",
+				session, expires=expiration)
+			return response
+		else:
+			return make_page("login.html",
+				loginfailed=True)
 
 @app.route("/logout")
 def logout():
 	if is_authenticated():
-		with database:
-			database.del_session(flask.request.cookies[
-				"btpd-session"])
+		database.del_session(flask.request.cookies[
+			"btpd-session"])
 	return login_redirect()
 
 @app.route("/settings")
@@ -277,13 +264,11 @@ def settings():
 	id = flask.request.args.get("id", "")
 	if not id.isdigit():
 		id = None
-	with database:
-		own_id = database.id_from_session(flask.request.cookies[
-			"btpd-session"])
-		if not id:
-			id = own_id
-		username = database.username_from_id(
-			id)
+	own_id = database.id_from_session(flask.request.cookies[
+		"btpd-session"])
+	if not id:
+		id = own_id
+	username = database.username_from_id(id)
 	if (not admin and not id == own_id) or not username:
 		return flask.abort(400)
 	return make_page("settings.html")
@@ -292,16 +277,15 @@ def settings():
 def users():
 	if not is_admin():
 		return login_redirect()
-	with database:
-		users = database.list_users()
-		for i, user in enumerate(users):
-			user_dict = {}
-			user_dict["id"] = user[0]
-			user_dict["username"] = user[1]
-			user_dict["admin"] = "✓" if user[2] == 1 else "✘"
-			user_dict["torrent_count"] = database.torrent_count(
-				user_dict["id"])
-			users[i] = user_dict
+	users = database.list_users()
+	for i, user in enumerate(users):
+		user_dict = {}
+		user_dict["id"] = user[0]
+		user_dict["username"] = user[1]
+		user_dict["admin"] = "✓" if user[2] == 1 else "✘"
+		user_dict["torrent_count"] = database.torrent_count(
+			user_dict["id"])
+		users[i] = user_dict
 	return make_page("users.html", users=users)
 
 @app.route("/adduser", methods=["GET", "POST"])
@@ -313,19 +297,17 @@ def add_user():
 		password = flask.request.form["password"]
 		password_confirm = flask.request.form["passwordconfirm"]
 		admin = "admin" in flask.request.form
-		with database:
-			if database.has_username(username):
-				return make_page("adduser.html",
-					usernamefield=username,
-					adduserfailed=True,
-					warning="Username already in use")
+		if database.has_username(username):
+			return make_page("adduser.html",
+				usernamefield=username,
+				adduserfailed=True,
+				warning="Username already in use")
 		if not password == password_confirm:
 			return make_page("adduser.html",
 				usernamefield=username,
 				adduserfailed=True,
 				warning="Passwords do not match")
-		with database:
-			database.add_user(username, password, admin)
+		database.add_user(username, password, admin)
 		return flask.redirect(flask.url_for("users"))
 	else:
 		return make_page("adduser.html")
@@ -337,13 +319,11 @@ def remove_user():
 	id = flask.request.args["id"]
 	if "seriously" in flask.request.args:
 		if flask.request.args["seriously"] == "1":
-			with database:
-				database.del_user(id)
+			database.del_user(id)
 		return flask.redirect(flask.url_for(
 			"users"))
 	else:
-		with database:
-			username = database.username_from_id(id)
+		username = database.username_from_id(id)
 		return make_page("userseriously.html",
 			id=id, target_username=username,
 			warning="Are you sure you want to remove"
