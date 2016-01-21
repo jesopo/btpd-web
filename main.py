@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 import copy, argparse, base64, codecs, datetime, hashlib
-import os, subprocess, sqlite3, threading, time
+import os, ssl, subprocess, sqlite3, threading, time
 import flask, scrypt, libtorrent, werkzeug
 import Config, Database, Utils
 
@@ -170,13 +170,14 @@ def add():
 		if "../" in directory:
 			return flask.abort(400)
 		filename = "/tmp/btpd.%d." % os.getpid()
-		if flask.request.form["url"].strip():
+		if flask.request.form["torrenturl"].strip():
 			filename = "%surl.%s.torrent" % (filename,
 				hashlib.md5(flask.request.form[
-				"url"].encode("utf8")).hexdigest())
-			subprocess.check_call(["wget", "-O",
-				filename, flask.request.form[
-				"url"]])
+				"torrenturl"].encode("utf8")
+				).hexdigest())
+			Utils.download_torrent(
+				flask.request.form["torrenturl"],
+				filename)
 		else:
 			file = flask.request.files["file"]
 			filename = "%sfile.%s.torrent" % (filename,
@@ -330,8 +331,23 @@ def remove_user():
 			" this user?")
 
 if __name__ == "__main__":
+	tls_context = None
+	if app.config.get("TLS", False):
+		assert "TLS_CERT" in app.config, ("No TLS certificate "
+			"specified.")
+		assert "TLS_KEY" in app.config, "No TLS key specified."
+		tls_context = ssl.SSLContext(ssl.PROTOCOL_TLSv1_2)
+		tls_context.options = (ssl.OP_CIPHER_SERVER_PREFERENCE|
+			ssl.OP_SINGLE_DH_USE|ssl.OP_SINGLE_ECDH_USE|
+			ssl.OP_NO_COMPRESSION)
+		tls_context.load_cert_chain(app.config["TLS_CERT"],
+			app.config["TLS_KEY"])
+		if "TLS_CIPHERS" in app.config:
+			tls_context.set_ciphers(app.config[
+				"TLS_CIPHERS"])
 	list_thread.start()
 	bindhost = app.config.get("BINDHOST", "127.0.0.1")
 	port = app.config.get("PORT", 5000)
 	debug = app.config.get("DEBUG", False)
-	app.run(host=bindhost, port=port, debug=debug)
+	app.run(host=bindhost, port=port, debug=debug,
+		ssl_context=tls_context)

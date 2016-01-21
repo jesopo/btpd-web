@@ -9,11 +9,6 @@ def get_torrent_list():
 def do_torrent_action(id, action):
 	subprocess.check_call(["btcli", action, id])
 
-def get_torrent_title(id):
-	title = subprocess.check_output(["btcli", "list",
-		id, "-f", "%n"]).decode("utf8")
-	return title
-
 def add_torrent(directory, torrent_file, idle=False):
 	add_command = ["btcli", "add", "-d", directory,
 		torrent_file]
@@ -23,3 +18,6 @@ def add_torrent(directory, torrent_file, idle=False):
 
 def remove_torrent(id):
 	subprocess.check_call(["btcli", "del", id])
+
+def download_torrent(url, filename):
+	subprocess.check_call(["wget", "-O", filename, url])
