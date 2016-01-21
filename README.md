@@ -7,3 +7,8 @@ Python3 Bittorrent Protocol Daemon web front end!
 
 To install dependencies;
 > pip3 install flask python-libtorrent
+
+## Todo
+* Add magnet url support.
+* Better error handling.
+* Display overall btpd stats for admins.
