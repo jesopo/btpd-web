@@ -213,8 +213,7 @@ def remove():
 		with list_lock:
 			info_hash = torrent_list[int(id)]["info_hash"]
 		if flask.request.args["seriously"] == "1":
-			with database:
-				database.del_torrent(info_hash)
+			database.del_torrent(info_hash)
 			Utils.remove_torrent(id)
 		with list_condition:
 			list_condition.notify()
