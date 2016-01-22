@@ -73,6 +73,9 @@ def is_authenticated():
 		flask.request.cookies.get("btpd-session"))
 def is_admin():
 	return database.is_admin(flask.request.cookies["btpd-session"])
+def user_id():
+	return database.id_from_session(flask.request.cookies[
+		"btpd-session"])
 def login_redirect():
 	return flask.redirect(flask.url_for("login"))
 def get_referrer_params():
@@ -145,12 +148,16 @@ def index():
 		orderby=flask.request.args.get("orderby", 0))
 
 @app.route("/action")
-def torrent_action():
+def action():
 	if not is_authenticated():
 		return login_redirect()
+	id = flask.request.args["id"]
+	owner = torrent_list[int(id)]["owner"]
+	if not admin and not user_id() == owner:
+		return flask.abort(400)
+
 	referrer_params = get_referrer_params()
 	state = flask.request.args["state"]
-	id = flask.request.args["id"]
 	if not id.isdigit() or not state in TORRENT_ACTIONS:
 		return flask.abort(400)
 	Utils.do_torrent_action(id, TORRENT_ACTIONS[state])
@@ -209,6 +216,9 @@ def remove():
 	if not is_authenticated():
 		return login_redirect()
 	id = flask.request.args["id"]
+	owner = torrent_list[int(id)]["owner"]
+	if not admin and not user_id() == owner:
+		return flask.abort(400)
 	if "seriously" in flask.request.args:
 		with list_lock:
 			info_hash = torrent_list[int(id)]["info_hash"]

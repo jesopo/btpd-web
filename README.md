@@ -12,3 +12,4 @@ To install dependencies;
 * Add magnet url support.
 * Better error handling.
 * Display overall btpd stats for admins.
+* User settings page.
