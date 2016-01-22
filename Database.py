@@ -74,9 +74,11 @@ class Database(object):
 			"SELECT hash, salt FROM users WHERE username=?",
 			[username])
 		hash, salt = self.cursor().fetchone() or [None, None]
-		hashed = self.make_hash(password, salt)
-		if hash and hash == self.make_hash(password, salt):
-			return True
+		if hash and salt:
+			hashed = self.make_hash(password, salt)
+			if hash and hash == self.make_hash(
+					password, salt):
+				return True
 		return False
 	def is_authenticated(self, session):
 		id = self.id_from_session(session)
