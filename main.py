@@ -153,7 +153,7 @@ def action():
 		return login_redirect()
 	id = flask.request.args["id"]
 	owner = torrent_list[int(id)]["owner"]
-	if not admin and not user_id() == owner:
+	if not is_admin() and not user_id() == owner:
 		return flask.abort(400)
 
 	referrer_params = get_referrer_params()
@@ -217,7 +217,7 @@ def remove():
 		return login_redirect()
 	id = flask.request.args["id"]
 	owner = torrent_list[int(id)]["owner"]
-	if not admin and not user_id() == owner:
+	if not is_admin() and not user_id() == owner:
 		return flask.abort(400)
 	if "seriously" in flask.request.args:
 		with list_lock:
