@@ -12,6 +12,12 @@ HEADINGS= ["ID", "Name", "State", "Percent", "Size", "Ratio", "Uploader"]
 ARROW_DOWN = "▾"
 ARROW_UP = "▴"
 
+ERROR_INVALID_ID = "An invalid ID was provided."
+ERROR_ACTION_UNAUTHORISED = ("You are not authorised to "
+	"change this torrent")
+ERROR_ACCESS_UNAUTHORISED = ("You are not authorised to "
+	"view this page")
+
 app = flask.Flask(__name__)
 app.config.from_object(Config)
 
@@ -152,14 +158,18 @@ def action():
 	if not is_authenticated():
 		return login_redirect()
 	id = flask.request.args["id"]
-	owner = torrent_list[int(id)]["owner"]
+	if not id.isdigit() or not int(id) in torrent_list:
+		flask.abort(400, description=ERROR_INVALID_ID)
+	id = int(id)
+	owner = torrent_list[id]["owner"]
 	if not is_admin() and not user_id() == owner:
-		return flask.abort(400)
+		flask.abort(401, description=
+			ERROR_ACTION_UNAUTHORISED)
 
 	referrer_params = get_referrer_params()
 	state = flask.request.args["state"]
-	if not id.isdigit() or not state in TORRENT_ACTIONS:
-		return flask.abort(400)
+	if not state in TORRENT_ACTIONS:
+		flask.abort(400, description="Unkown torrent state provided.")
 	Utils.do_torrent_action(id, TORRENT_ACTIONS[state])
 	with list_condition:
 		list_condition.notify()
@@ -175,7 +185,7 @@ def add():
 		if directory.startswith("/"):
 			directory = directory[1:]
 		if "../" in directory:
-			return flask.abort(400)
+			return flask.abort(400, description="Invalid path provided")
 		filename = "/tmp/btpd.%d." % os.getpid()
 		if flask.request.form["torrenturl"].strip():
 			filename = "%surl.%s.torrent" % (filename,
@@ -216,12 +226,16 @@ def remove():
 	if not is_authenticated():
 		return login_redirect()
 	id = flask.request.args["id"]
-	owner = torrent_list[int(id)]["owner"]
+	if not id.isdigit() or not int(id) in torrent_list:
+		flask.abort(400, description=ERROR_INVALID_ID)
+	id = int(id)
+	owner = torrent_list[id]["owner"]
 	if not is_admin() and not user_id() == owner:
-		return flask.abort(400)
+		return flask.abort(401, description=
+			ERROR_ACTION_UNAUTHORISED)
 	if "seriously" in flask.request.args:
 		with list_lock:
-			info_hash = torrent_list[int(id)]["info_hash"]
+			info_hash = torrent_list[id]["info_hash"]
 		if flask.request.args["seriously"] == "1":
 			database.del_torrent(info_hash)
 			Utils.remove_torrent(id)
@@ -230,7 +244,7 @@ def remove():
 		return flask.redirect(flask.url_for("index"))
 	else:
 		with list_lock:
-			title = torrent_list[int(id)]["title"]
+			title = torrent_list[id]["title"]
 		return make_page("seriously.html", id=id, title=title,
 			warning="Are you sure you want to remove this torrent?")
 
@@ -280,7 +294,8 @@ def settings():
 		id = own_id
 	username = database.username_from_id(id)
 	if (not admin and not id == own_id) or not username:
-		return flask.abort(400)
+		flask.abort(401, description=
+			ERROR_ACCESS_UNAUTHORISED)
 	return make_page("settings.html")
 
 @app.route("/users")

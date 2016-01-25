@@ -7,7 +7,7 @@ def get_torrent_list():
 	return lines
 
 def do_torrent_action(id, action):
-	subprocess.check_call(["btcli", action, id])
+	subprocess.check_call(["btcli", action, str(id)])
 
 def add_torrent(directory, torrent_file, idle=False):
 	add_command = ["btcli", "add", "-d", directory,
