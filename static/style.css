@@ -208,16 +208,10 @@ a:hover {
 #adddiv input:last-child {
 	margin-top: 5px;
 }
-#adddiv span {
-	margin-left: 4px;
-}
 #ordiv {
 	text-align: center;
 	margin-bottom: 5px;
 }
 #adduserdiv input[type=checkbox] {
 	width: initial;
-}
-#adduserdiv span {
-	margin-left: 4px;
 }
