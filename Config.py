@@ -1,6 +1,6 @@
 BINDHOST = "0.0.0.0"
 BASEDIR = "/home/media/music"
-DEBUG = True
+DEBUG = False
 PER_PAGE = 40
 LIST_INTERVAL=5
 TLS = True

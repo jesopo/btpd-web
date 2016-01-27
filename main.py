@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 import copy, argparse, base64, codecs, datetime, hashlib
-import os, ssl, subprocess, sqlite3, threading, time
+import os, subprocess, sqlite3, threading, time
 import flask, scrypt, libtorrent, werkzeug
 import Config, Database, Utils
 
@@ -28,13 +28,13 @@ last_list = 0
 list_lock = threading.Lock()
 list_condition = threading.Condition()
 def fill_torrent_list():
+	global last_list
+	global torrent_list
 	while True:
-		global last_list
-		global torrent_list
 		try:
 			lines = Utils.get_torrent_list()
 		except:
-			continue
+			lines = []
 		torrents = {}
 		for i, line in enumerate(lines):
 			line = line.rsplit(None, 7)
@@ -55,13 +55,14 @@ def fill_torrent_list():
 				torrent["state"] = TORRENT_STATES[
 					torrent["state"]]
 			torrents[torrent["id"]] = torrent
-		removed = set(torrent["info_hash"
-			] for torrent in torrent_list.values())-set(torrent[
-			"info_hash"] for torrent in torrents.values())
-		for info_hash in removed:
-			database.del_torrent(info_hash)
-		with list_lock:
-			torrent_list = torrents
+		if lines:
+			removed = set(torrent["info_hash"
+				] for torrent in torrent_list.values())-set(torrent[
+				"info_hash"] for torrent in torrents.values())
+			for info_hash in removed:
+				database.del_torrent(info_hash)
+			with list_lock:
+				torrent_list = torrents
 		since_last = time.time()-last_list
 		interval = app.config.get("LIST_INTERVAL", 4)
 		if last_list == 0 or since_last < interval:
@@ -355,6 +356,7 @@ def remove_user():
 			" this user?")
 
 if __name__ == "__main__":
+	import ssl
 	tls_context = None
 	if app.config.get("TLS", False):
 		assert "TLS_CERT" in app.config, ("No TLS certificate "
@@ -369,9 +371,9 @@ if __name__ == "__main__":
 		if "TLS_CIPHERS" in app.config:
 			tls_context.set_ciphers(app.config[
 				"TLS_CIPHERS"])
-	list_thread.start()
 	bindhost = app.config.get("BINDHOST", "127.0.0.1")
 	port = app.config.get("PORT", 5000)
 	debug = app.config.get("DEBUG", False)
+	list_thread.start()
 	app.run(host=bindhost, port=port, debug=debug,
 		ssl_context=tls_context)
