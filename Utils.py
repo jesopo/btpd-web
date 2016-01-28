@@ -17,7 +17,7 @@ def add_torrent(directory, torrent_file, idle=False):
 	subprocess.check_call(add_command)
 
 def remove_torrent(id):
-	subprocess.check_call(["btcli", "del", id])
+	subprocess.check_call(["btcli", "del", str(id)])
 
 def download_torrent(url, filename):
 	subprocess.check_call(["wget", "-O", filename, url])
