@@ -14,3 +14,4 @@ To install dependencies;
 * Better error handling.
 * Display overall btpd stats for admins.
 * User settings page.
+* Ability to filter torrents
