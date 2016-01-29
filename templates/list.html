@@ -12,7 +12,7 @@
 				{% for line in lines -%}
 				<tr class="torrent" id="torrent{{ line["id"]|e }}">
 					<td class="torrentid"><a class="state{{ line["state"]|e }}" href="action?id={{ line["id"]|e }}&state={{ line["state"]| e }}">{{ line["id"]|e }}</a></td>
-					<td class="torrentname">{{ line["title"]|e }}</td>
+					<td class="torrentname" title="{{ line["title"]|e }}">{{ line["title"]|e }}</td>
 					<td class="torrentstatus">{{ line["state"]|e }}</td>
 					<td class="torrentpercent">{{ line["percent"]|e }}</td>
 					<td class="torrentsize">{{ line["pretty_size"]|e }}</td>
