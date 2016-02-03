@@ -1,0 +1,29 @@
+			<div id="viewdiv">
+				<div class="viewtitle">{{ torrent["title"]|e }}</div>
+				<table class="view">
+					<tr>
+						<th>ID</th>
+						<!--<th>Infohash</th>-->
+						<th>State</th>
+						<th>Size</th>
+						<th>Percent</th>
+						<th>Downloaded</th>
+						<th>Uploaded</th>
+						<th>Peers</th>
+						<th>Ratio</th>
+						<th>Uploader</th>
+					</tr>
+					<tr>
+						<td class="torrentid">{{ torrent["id"]|e }}</td>
+						<!--<td>{{ torrent["info_hash"]|e }}</td>-->
+						<td>{{ torrent["state"]|e }}</td>
+						<td>{{ torrent["size"]|e }}</td>
+						<td>{{ torrent["percent"]|e }}</td>
+						<td>{{ torrent["downloaded"]|e }}B</td>
+						<td>{{ torrent["uploaded"]|e }}B</td>
+						<td>{{ torrent["peers"]|e }}</td>
+						<td>{{ torrent["ratio"]|e }}</td>
+						<td>{{ torrent["uploader"]|e }}</td>
+					</tr>
+				</table>
+			</div>

@@ -2,8 +2,9 @@ import subprocess
 
 def get_torrent_list():
 	lines = subprocess.check_output(["btcli", "list", "-f",
-		"%n %# %t %p %S %r %s %h\\n"]).decode("utf8"
-		).strip().split("\n")
+		"%n %# %t %p %S %r %s %h %P %^ %v %u %g "
+		"%H %T\\n"]
+		).decode("utf8").strip().split("\n")
 	return lines
 
 def do_torrent_action(id, action):

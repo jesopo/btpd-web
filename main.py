@@ -12,6 +12,7 @@ HEADINGS= ["ID", "Name", "State", "Percent", "Size", "Ratio", "Uploader"]
 ARROW_DOWN = "▾"
 ARROW_UP = "▴"
 
+ERROR_NO_ID = "No ID supplied."
 ERROR_INVALID_ID = "An invalid ID was provided."
 ERROR_ACTION_UNAUTHORISED = ("You are not authorised to "
 	"change this torrent")
@@ -37,7 +38,7 @@ def fill_torrent_list():
 			lines = []
 		torrents = {}
 		for i, line in enumerate(lines):
-			line = line.rsplit(None, 7)
+			line = line.rsplit(None, 14)
 			owner = database.get_torrent_owner(line[-1])
 			if not owner:
 				database.add_torrent(line[-1], "root")
@@ -50,7 +51,11 @@ def fill_torrent_list():
 				int(line[4]), "ratio": float(line[5]),
 				"pretty_size": line[6], "info_hash": line[7],
 				"uploader": owner_username, "title":
-				line[0]}
+				line[0], "peers": line[8], "upload_speed":
+				line[9], "download_speed": line[10],
+				"uploaded": line[11], "downloaded": line[12],
+				"have_pieces": line[13], "total_pieces":
+				line[14]}
 			if torrent["state"] in TORRENT_STATES:
 				torrent["state"] = TORRENT_STATES[
 					torrent["state"]]
@@ -158,6 +163,8 @@ def index():
 def action():
 	if not is_authenticated():
 		return login_redirect()
+	if not "id" in flask.request.args:
+		flask.abort(400, description=ERROR_NO_ID)
 	id = flask.request.args["id"]
 	if not id.isdigit() or not int(id) in torrent_list:
 		flask.abort(400, description=ERROR_INVALID_ID)
@@ -226,6 +233,8 @@ def add():
 def remove():
 	if not is_authenticated():
 		return login_redirect()
+	if not "id" in flask.request.args:
+		flask.abort(400, description=ERROR_NO_ID)
 	id = flask.request.args["id"]
 	if not id.isdigit() or not int(id) in torrent_list:
 		flask.abort(400, description=ERROR_INVALID_ID)
@@ -342,6 +351,8 @@ def add_user():
 def remove_user():
 	if not is_admin():
 		return login_redirect()
+	if not "id" in flask.request.args:
+		flask.abort(400, description=ERROR_NO_ID)
 	id = flask.request.args["id"]
 	if "seriously" in flask.request.args:
 		if flask.request.args["seriously"] == "1":
@@ -354,6 +365,18 @@ def remove_user():
 			id=id, target_username=username,
 			warning="Are you sure you want to remove"
 			" this user?")
+
+@app.route("/view")
+def view():
+	if not is_authenticated():
+		return login_redirect()
+	if not "id" in flask.request.args:
+		flask.abort(400, description=ERROR_NO_ID)
+	id = flask.request.args["id"]
+	if not id.isdigit() or not int(id) in torrent_list:
+		flask.abort(400, description=ERROR_INVALID_ID)
+	torrent = torrent_list[int(id)]
+	return make_page("view.html", torrent=torrent)
 
 if __name__ == "__main__":
 	import ssl

@@ -1,12 +1,12 @@
 			<table class="torrents">
 				<tr class="torrentheadings">
-					<th><a class="torrentheading" href="?orderby={{ orders[0] }}">{{ headings[0] }}</a></th>
-					<th><a class="torrentheading" href="?orderby={{ orders[1] }}">{{ headings[1] }}</a></th>
-					<th><a class="torrentheading" href="?orderby={{ orders[2] }}">{{ headings[2] }}</a></th>
-					<th><a class="torrentheading" href="?orderby={{ orders[3] }}">{{ headings[3] }}</a></th>
-					<th><a class="torrentheading" href="?orderby={{ orders[4] }}">{{ headings[4] }}</a></th>
-					<th><a class="torrentheading" href="?orderby={{ orders[5] }}">{{ headings[5] }}</a></th>
-					<th><a class="torrentheading" href="?orderby={{ orders[6] }}">{{ headings[6] }}</a></th>
+					<th><a class="torrentheading" href="?orderby={{ orders[0]|e }}">{{ headings[0] }}</a></th>
+					<th><a class="torrentheading" href="?orderby={{ orders[1]|e }}">{{ headings[1] }}</a></th>
+					<th><a class="torrentheading" href="?orderby={{ orders[2]|e }}">{{ headings[2] }}</a></th>
+					<th><a class="torrentheading" href="?orderby={{ orders[3]|e }}">{{ headings[3] }}</a></th>
+					<th><a class="torrentheading" href="?orderby={{ orders[4]|e }}">{{ headings[4] }}</a></th>
+					<th><a class="torrentheading" href="?orderby={{ orders[5]|e }}">{{ headings[5] }}</a></th>
+					<th><a class="torrentheading" href="?orderby={{ orders[6]|e }}">{{ headings[6] }}</a></th>
 					<th><a class="torrentadd" href="add">+</a></th>
 				</tr>
 				{% for line in lines -%}
@@ -29,7 +29,7 @@
 				{% if page == n -%}
 				<span>{{ n+1 }}</span>
 				{%- else -%}
-				<a href="?page={{ n+1 }}&orderby={{ orderby }}">{{ n+1 }}</a>
+				<a href="?page={{ n+1 }}&orderby={{ orderby|e }}">{{ n+1 }}</a>
 				{%- endif -%}
 			{% endfor %}
 			</div>

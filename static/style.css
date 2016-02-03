@@ -43,7 +43,7 @@ body {
 	padding: 0px 5px 5px 5px;
 	font-size: 0.8em;
 }
-.torrents {
+.torrents, .view {
 	width: 100%;
 	border-collapse: collapse;
 }
@@ -124,11 +124,13 @@ a:hover {
 #seriouslydiv {
 	width: 300px;
 }
-.seriouslytitle, .seriouslyquestion {
+.seriouslytitle, .seriouslyquestion, .viewtitle {
 	text-align: center;
 }
-.seriouslytitle {
-	font-size: 1.3em;
+.seriouslytitle, .viewtitle {
+	text-decoration: underline;
+	font-size: 1.4em;
+	margin-bottom: 8px;
 }
 .seriouslyquestion {
 	font-size: 0.8em;
@@ -224,4 +226,18 @@ a:hover {
 }
 #adduserdiv input[type=checkbox] {
 	width: initial;
+}
+.view td, .view th {
+	padding-left: 4px;
+	padding-right: 4px;
+}
+.view td {
+	font-size: 0.9em;
+	text-align: center;
+	padding-top: 4px;
+}
+.view th {
+	font-size: 1.1em;
+	border-bottom: 1px solid #111111;
+	padding-bottom: 4px;
 }
