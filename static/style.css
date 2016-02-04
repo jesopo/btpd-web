@@ -130,7 +130,7 @@ a:hover {
 .seriouslytitle, .viewtitle {
 	text-decoration: underline;
 	font-size: 1.4em;
-	margin-bottom: 8px;
+	margin-bottom: 10px;
 }
 .seriouslyquestion {
 	font-size: 0.8em;
@@ -227,16 +227,16 @@ a:hover {
 #adduserdiv input[type=checkbox] {
 	width: initial;
 }
-.view td, .view th {
-	padding-left: 4px;
-	padding-right: 4px;
-}
 .view td {
+	padding-left: 8px;
+	padding-right: 8px;
 	font-size: 0.9em;
 	text-align: center;
 	padding-top: 4px;
 }
 .view th {
+	padding-left: 4px;
+	padding-right: 4px;
 	font-size: 1.1em;
 	border-bottom: 1px solid #111111;
 	padding-bottom: 4px;

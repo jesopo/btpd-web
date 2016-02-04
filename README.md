@@ -14,4 +14,3 @@ To install dependencies;
 * Display overall btpd stats for admins.
 * User settings page.
 * Ability to filter torrents
-* Move state changing link and state colours to state column.

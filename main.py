@@ -175,7 +175,7 @@ def action():
 			ERROR_ACTION_UNAUTHORISED)
 
 	referrer_params = get_referrer_params()
-	state = flask.request.args["state"]
+	state = torrent_list[id]["state"]
 	if not state in TORRENT_ACTIONS:
 		flask.abort(400, description="Unkown torrent state provided.")
 	Utils.do_torrent_action(id, TORRENT_ACTIONS[state])
