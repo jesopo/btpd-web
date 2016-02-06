@@ -19,8 +19,8 @@
 						<td>{{ torrent["state"]|e }}</td>
 						<td>{{ torrent["size"]|e }}</td>
 						<td>{{ torrent["percent"]|e }}</td>
-						<td>{{ torrent["downloaded"]|e }}B</td>
-						<td>{{ torrent["uploaded"]|e }}B</td>
+						<td>{{ torrent["downloaded"]|e }}B ({{ torrent["download_speed"]|e }}B/s)</td>
+						<td>{{ torrent["uploaded"]|e }}B ({{ torrent["upload_speed"]|e }}B/s)</td>
 						<td>{{ torrent["peers"]|e }}</td>
 						<td>{{ torrent["ratio"]|e }}</td>
 						<td>{{ torrent["uploader"]|e }}</td>

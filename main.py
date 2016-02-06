@@ -62,8 +62,9 @@ def fill_torrent_list():
 			torrents[torrent["id"]] = torrent
 		if lines:
 			removed = set(torrent["info_hash"
-				] for torrent in torrent_list.values())-set(torrent[
-				"info_hash"] for torrent in torrents.values())
+				] for torrent in torrent_list.values())-set(
+				torrent["info_hash"
+				] for torrent in torrents.values())
 			for info_hash in removed:
 				database.del_torrent(info_hash)
 			with list_lock:
@@ -375,7 +376,12 @@ def view():
 	id = flask.request.args["id"]
 	if not id.isdigit() or not int(id) in torrent_list:
 		flask.abort(400, description=ERROR_INVALID_ID)
-	torrent = torrent_list[int(id)]
+	id = int(id)
+	owner = torrent_list[id]["owner"]
+	if not is_admin() and not user_id() == owner:
+		return flask.abort(401, description=
+			ERROR_ACTION_UNAUTHORISED)
+	torrent = torrent_list[id]
 	return make_page("view.html", torrent=torrent)
 
 if __name__ == "__main__":

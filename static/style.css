@@ -75,6 +75,9 @@ body {
 .torrentid, .torrentstatus, .torrentpercent, .torrentsize, .torrentratio {
 	text-align: right;
 }
+.torrentid {
+	font-weight: bold;
+}
 a {
 	text-decoration: none;
 }
