@@ -190,7 +190,7 @@ def add():
 	if not is_authenticated():
 		return login_redirect()
 	if flask.request.method == "POST":
-		directory = flask.request.form["directory"]
+		directory = flask.request.form["directory"].strip()
 		if directory.startswith("/"):
 			directory = directory[1:]
 		if "../" in directory:
