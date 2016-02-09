@@ -7,7 +7,7 @@
 					<th><a class="torrentheading" href="?orderby={{ orders[4]|e }}">{{ headings[4] }}</a></th>
 					<th><a class="torrentheading" href="?orderby={{ orders[5]|e }}">{{ headings[5] }}</a></th>
 					<th><a class="torrentheading" href="?orderby={{ orders[6]|e }}">{{ headings[6] }}</a></th>
-					<th><a class="torrentadd" href="add">+</a></th>
+					<th class="torrentadd"><a href="add">+</a></th>
 				</tr>
 				{% for line in lines -%}
 				<tr class="torrent" id="torrent{{ line["id"]|e }}">

@@ -101,8 +101,11 @@ a:hover {
 	font-weight: bold;
 	font-size: 1.1em;
 }
-.torrentadd, .torrentadd a:visited {
-	font-size: 1.1em;
+.torrentadd {
+	text-align: left;
+}
+.torrentadd a {
+	font-size: 1.2em;
 	color: #2C2;
 }
 .torrentadd:hover {
