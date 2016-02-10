@@ -9,6 +9,7 @@
 						<th>Percent</th>
 						<th>Downloaded</th>
 						<th>Uploaded</th>
+						<th>Pieces</th>
 						<th>Peers</th>
 						<th>Ratio</th>
 						<th>Uploader</th>
@@ -17,10 +18,11 @@
 						<td class="torrentid">{{ torrent["id"]|e }}</td>
 						<!--<td>{{ torrent["info_hash"]|e }}</td>-->
 						<td>{{ torrent["state"]|e }}</td>
-						<td>{{ torrent["size"]|e }}</td>
+						<td>{{ torrent["pretty_size"]|e }}</td>
 						<td>{{ torrent["percent"]|e }}</td>
 						<td>{{ torrent["downloaded"]|e }}B ({{ torrent["download_speed"]|e }}B/s)</td>
 						<td>{{ torrent["uploaded"]|e }}B ({{ torrent["upload_speed"]|e }}B/s)</td>
+						<td>{{ torrent["have_pieces"]|e }}/{{ torrent["total_pieces"]|e }}</td>
 						<td>{{ torrent["peers"]|e }}</td>
 						<td>{{ torrent["ratio"]|e }}</td>
 						<td>{{ torrent["uploader"]|e }}</td>
