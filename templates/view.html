@@ -13,6 +13,7 @@
 						<th>Peers</th>
 						<th>Ratio</th>
 						<th>Uploader</th>
+						<th></th>
 					</tr>
 					<tr>
 						<td class="torrentid">{{ torrent["id"]|e }}</td>
@@ -26,6 +27,7 @@
 						<td>{{ torrent["peers"]|e }}</td>
 						<td>{{ torrent["ratio"]|e }}</td>
 						<td>{{ torrent["uploader"]|e }}</td>
+						<td><a class="torrentremove" href="remove?id={{ torrent["id"]|e }}">✘</a></td>
 					</tr>
 				</table>
 			</div>
