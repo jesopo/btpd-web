@@ -4,7 +4,7 @@ $(document).ready(function() {
 	}
 });
 
-$(document).keyup(function(e) {
+$(document).keydown(function(e) {
 	var target = e.target.tagName.toLowerCase();
 	if (target == "body") {
 		var charHit = String.fromCharCode(e.which || e.keyCode
