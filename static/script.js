@@ -6,7 +6,7 @@ $(document).ready(function() {
 
 $(document).keydown(function(e) {
 	var target = e.target.tagName.toLowerCase();
-	if (target == "body") {
+	if (target != "input") {
 		var charHit = String.fromCharCode(e.which || e.keyCode
 			).toLowerCase();
 		if ($.trim(charHit) != "") {

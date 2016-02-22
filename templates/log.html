@@ -1,0 +1,13 @@
+		<div id="logdiv">
+			<form action="log" method="get">
+				<input type="text" name="lines" placeholder="Log lines"/>
+				<input type="submit" value="Get lines" />
+			</form>
+		</div>
+		<table class="log">
+			{% for line in lines %}
+				<tr>
+					<td>{{ line|e }}</td>
+				</tr>
+			{% endfor %}
+		</table>

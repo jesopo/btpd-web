@@ -23,6 +23,7 @@ app = flask.Flask(__name__)
 app.config.from_object(Config)
 
 database = Database.Database()
+utils = Utils.Utils(app)
 
 torrent_list = {}
 last_list = 0
@@ -33,7 +34,7 @@ def fill_torrent_list():
 	global torrent_list
 	while True:
 		try:
-			lines = Utils.get_torrent_list()
+			lines = utils.get_torrent_list()
 		except:
 			lines = []
 		torrents = {}
@@ -179,7 +180,7 @@ def action():
 	state = torrent_list[id]["state"]
 	if not state in TORRENT_ACTIONS:
 		flask.abort(400, description="Unkown torrent state provided.")
-	Utils.do_torrent_action(id, TORRENT_ACTIONS[state])
+	utils.do_torrent_action(id, TORRENT_ACTIONS[state])
 	with list_condition:
 		list_condition.notify()
 	return flask.redirect("%s%s" % (flask.url_for("index"),
@@ -201,7 +202,7 @@ def add():
 				hashlib.md5(flask.request.form[
 				"torrenturl"].encode("utf8")
 				).hexdigest())
-			Utils.download_torrent(
+			utils.download_torrent(
 				flask.request.form["torrenturl"],
 				filename)
 		else:
@@ -219,7 +220,7 @@ def add():
 		idle = "idle" in flask.request.form
 		directory = os.path.join(app.config["BASEDIR"], directory)
 
-		Utils.add_torrent(directory, filename, idle)
+		utils.add_torrent(directory, filename, idle)
 		os.remove(filename)
 		with list_condition:
 			list_condition.notify()
@@ -249,7 +250,7 @@ def remove():
 			info_hash = torrent_list[id]["info_hash"]
 		if flask.request.args["seriously"] == "1":
 			database.del_torrent(info_hash)
-			Utils.remove_torrent(id)
+			utils.remove_torrent(id)
 		with list_condition:
 			list_condition.notify()
 		return flask.redirect(flask.url_for("index"))
@@ -383,6 +384,15 @@ def view():
 			ERROR_ACTION_UNAUTHORISED)
 	torrent = torrent_list[id]
 	return make_page("view.html", torrent=torrent)
+
+@app.route("/log")
+def log():
+	lines = None
+	if flask.request.args.get("lines") and flask.request.args[
+			"lines"].isdigit():
+		lines = int(flask.request.args["lines"])
+	loglines = utils.get_log(lines)
+	return make_page("log.html", lines=loglines)
 
 if __name__ == "__main__":
 	import ssl

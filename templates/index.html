@@ -13,7 +13,7 @@
 			<div id="titlediv"><a href="/">btpd web</a></div>
 			{% if user_username -%}
 			<div id="userdiv"><a href="settings">{{ user_username|e }}</a>
-			{% if user_admin %}- <a href="users">users</a>{% endif %}
+			{% if user_admin %}- <a href="users">users</a> - <a href="log">log</a>{% endif %}
 			 - <a href="logout">logout</a>
 			</div>
 			{%- endif %}

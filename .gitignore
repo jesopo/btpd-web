@@ -60,3 +60,4 @@ target/
 *.db
 *.crt
 *.key
+Config.py
