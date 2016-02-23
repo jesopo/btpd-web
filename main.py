@@ -218,7 +218,7 @@ def add():
 			).info_hash().to_bytes(), "hex").decode("utf8")
 
 		idle = "idle" in flask.request.form
-		directory = os.path.join(app.config["BASEDIR"], directory)
+		directory = os.path.join(app.config["BASE_DIR"], directory)
 
 		utils.add_torrent(directory, filename, idle)
 		os.remove(filename)
