@@ -28,7 +28,7 @@ class Utils(object):
 	def download_torrent(self, url, filename):
 		subprocess.check_call(["wget", "-O", filename, url])
 	def get_log(self, lines):
-		lines = lines or 32
+		lines = lines or self.app.config.get("LOG_LINES", 30)
 		with open(os.path.join(self.btpd_dir, "log"), "rb"
 				) as log:
 			return log.read().decode("utf8", "ignore"

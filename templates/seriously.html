@@ -1,18 +1,16 @@
-			<div id="seriouslydiv">
-				<div class="seriouslytitle">{{ title|e }}</div>
-				<div class="seriouslyquestion">{{ warning|e }}</div>
-				<div id="seriouslybuttons">
-					<form method="GET" id="seriouslyyes" action="remove">
-						<input type="hidden" name="id" value="{{ id|e }}" />
-						<input type="hidden" name="seriously" value="1" />
-						<input type="submit" value="Yes" />
-					</form>
-					<form method="GET" id="seriouslyno" action="remove?id={{ id|e }}&seriously=0">
-						<input type="hidden" name="id" value="{{ id|e }}" />
-						<input type="hidden" name="seriously" value="0" />
-						<input type="submit" value="No" />
-					</form>
-				</div>
+			<div class="seriouslytitle">{{ title|e }}</div>
+			<div class="seriouslyquestion">{{ warning|e }}</div>
+			<div id="seriouslybuttons">
+				<form method="GET" id="seriouslyyes" action="remove">
+					<input type="hidden" name="id" value="{{ id|e }}" />
+					<input type="hidden" name="seriously" value="1" />
+					<input type="submit" value="Yes" />
+				</form>
+				<form method="GET" id="seriouslyno" action="remove?id={{ id|e }}&seriously=0">
+					<input type="hidden" name="id" value="{{ id|e }}" />
+					<input type="hidden" name="seriously" value="0" />
+					<input type="submit" value="No" />
+				</form>
 			</div>
 			
 

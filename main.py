@@ -217,16 +217,21 @@ def add():
 		info_hash = codecs.encode(libtorrent.torrent_info(torrent
 			).info_hash().to_bytes(), "hex").decode("utf8")
 
+		username = database.username_from_session(
+			flask.request.cookies["btpd-session"])
+
 		idle = "idle" in flask.request.form
-		directory = os.path.join(app.config["BASE_DIR"], directory)
+		if not database.has_setting(username, "base_dir"):
+			database.set_setting(username, "base_dir",
+				app.config["BASE_DIR"])
+		base_dir = database.get_setting(username, "base_dir")
+		directory = os.path.join(base_dir, directory)
 
 		utils.add_torrent(directory, filename, idle)
 		os.remove(filename)
 		with list_condition:
 			list_condition.notify()
 
-		username = database.username_from_session(
-			flask.request.cookies["btpd-session"])
 		database.add_torrent(info_hash, username)
 		return flask.redirect(flask.url_for("index"))
 	return make_page("add.html")
@@ -292,12 +297,13 @@ def logout():
 			"btpd-session"])
 	return login_redirect()
 
-@app.route("/settings")
+@app.route("/settings", methods=["GET", "POST"])
 def settings():
 	if not is_authenticated():
 		return login_redirect()
 	admin = is_admin()
-	id = flask.request.args.get("id", "")
+	id = flask.request.args.get("id", flask.request.form.get(
+		"id", ""))
 	if not id.isdigit():
 		id = None
 	own_id = database.id_from_session(flask.request.cookies[
@@ -308,7 +314,49 @@ def settings():
 	if (not admin and not id == own_id) or not username:
 		flask.abort(401, description=
 			ERROR_ACCESS_UNAUTHORISED)
-	return make_page("settings.html")
+	settings = database.get_all_settings(username)
+	error = None
+	saved = False
+	if flask.request.method == "POST":
+		for setting, value in flask.request.form.items():
+			if error:
+				break
+			if not value:
+				continue
+			setting = setting.lower()
+			if setting == "username" and not username == value:
+				if database.id_from_username(value):
+					error = "Username taken."
+			elif setting == "password":
+				if not flask.request.form["password_confirm"
+						] == value:
+					error = "Passwords do not match"
+			elif setting == "base_dir" and not settings["base_dir"
+					] == value:
+				if not admin:
+					error = ("You are not permitted to"
+						" change your base directory")
+		if not error:
+			for setting, value in flask.request.form.items():
+				if not value:
+					continue
+				if setting == "username" and not username == value:
+					database.change_username(
+						username, value)
+				elif setting == "password":
+					database.set_password(username, value)
+				elif setting == "base_dir" and not settings[
+						"base_dir"] == value:
+					database.set_setting(username,
+						"base_dir", value)
+				else:
+					continue
+				saved = True
+		if saved:
+			settings = database.get_all_settings(username)
+	return make_page("settings.html", settings=settings,
+		username=username, id=id, admin=admin, error=error,
+		saved=saved)
 
 @app.route("/users")
 def users():

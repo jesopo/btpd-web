@@ -1,3 +1,19 @@
 			<div id="settingsdiv">
-				
+				<form action="settings" method="post">
+					<input type="hidden" value="{{ id|e }}" />
+					
+					{% if error %}<div id="settingserror">{{ error }}</div>{% elif saved %}<div id="settingsinfo">Saved.</div>{% endif %}
+					
+					<div>Username</div>
+					<input type="text" placeholder="Username" value="{{ username|e }}" name="username"/>
+					
+					<div>Base Directory</div>
+					<input type="text" placeholder="Base Directory" value="{{ settings["base_dir"]|e }}" name="base_dir" {% if not admin %}disabled {% endif %}/>
+					
+					<div>Password</div>
+					<input class="lessmargin" type="password" placeholder="Password" name="password" />
+					<input type="password" placeholder="Confirm" name="password_confirm" />
+						
+					<input type="Submit" value="Save" />
+				</form>
 			</div>
