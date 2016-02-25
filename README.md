@@ -12,5 +12,4 @@ To install dependencies;
 ## Todo
 * Add magnet url support.
 * Display overall btpd stats for admins.
-* User settings page.
 * Ability to filter torrents
