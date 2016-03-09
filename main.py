@@ -92,12 +92,6 @@ def user_id():
 		"btpd-session"])
 def login_redirect():
 	return flask.redirect(flask.url_for("login"))
-def get_referrer_params():
-	if flask.request.referrer:
-		referrer_params = flask.request.referrer.split("?", 1)
-		if len(referrer_params) > 1:
-			return "?%s" % referrer_params[1]
-	return ""
 def make_page(fragment, **kwargs):
 	session = flask.request.cookies.get("btpd-session")
 	user_username = database.username_from_session(session)
@@ -112,7 +106,6 @@ def index():
 	session = flask.request.cookies["btpd-session"]
 	admin = database.is_admin(session)
 	user_id = database.id_from_session(session)
-	referrer_params = get_referrer_params()
 	orderby = flask.request.args.get("orderby", "0")
 	descending = True
 	headings = HEADINGS[:]
@@ -176,15 +169,13 @@ def action():
 		flask.abort(401, description=
 			ERROR_ACTION_UNAUTHORISED)
 
-	referrer_params = get_referrer_params()
 	state = torrent_list[id]["state"]
 	if not state in TORRENT_ACTIONS:
 		flask.abort(400, description="Unkown torrent state provided.")
 	utils.do_torrent_action(id, TORRENT_ACTIONS[state])
 	with list_condition:
 		list_condition.notify()
-	return flask.redirect("%s%s" % (flask.url_for("index"),
-		referrer_params))
+	return flask.redirect(flask.request.referrer)
 
 @app.route("/add", methods=["GET", "POST"])
 def add():

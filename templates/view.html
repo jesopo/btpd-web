@@ -18,7 +18,7 @@
 					<tr>
 						<td class="torrentid">{{ torrent["id"]|e }}</td>
 						<!--<td>{{ torrent["info_hash"]|e }}</td>-->
-						<td>{{ torrent["state"]|e }}</td>
+						<td><a class="state{{ torrent["state"]|e }}" href="action?id={{ torrent["id"]|e }}">{{ torrent["state"]|e }}</a></td>
 						<td>{{ torrent["pretty_size"]|e }}</td>
 						<td>{{ torrent["percent"]|e }}</td>
 						<td>{{ torrent["downloaded"]|e }}B ({{ torrent["download_speed"]|e }}B/s)</td>
