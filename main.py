@@ -324,8 +324,8 @@ def settings():
 				if not flask.request.form["password_confirm"
 						] == value:
 					error = "Passwords do not match"
-			elif setting == "base_dir" and not settings["base_dir"
-					] == value:
+			elif setting == "base_dir" and not settings.get(
+					"base_dir") == value:
 				if not admin:
 					error = ("You are not permitted to"
 						" change your base directory")
@@ -338,8 +338,8 @@ def settings():
 						username, value)
 				elif setting == "password":
 					database.set_password(username, value)
-				elif setting == "base_dir" and not settings[
-						"base_dir"] == value:
+				elif setting == "base_dir" and not settings.get(
+						"base_dir") == value:
 					database.set_setting(username,
 						"base_dir", value)
 				else:

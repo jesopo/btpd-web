@@ -1,6 +1,6 @@
 			<div id="settingsdiv">
 				<form action="settings" method="post">
-					<input type="hidden" value="{{ id|e }}" />
+					<input type="hidden" value="{{ id|e }}" name="id" />
 					
 					{% if error %}<div id="settingserror">{{ error }}</div>{% elif saved %}<div id="settingsinfo">Saved.</div>{% endif %}
 					
