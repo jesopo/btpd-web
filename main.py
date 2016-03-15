@@ -39,6 +39,8 @@ def fill_torrent_list():
 			lines = []
 		torrents = {}
 		for i, line in enumerate(lines):
+			if not line:
+				continue
 			line = line.rsplit(None, 14)
 			owner = database.get_torrent_owner(line[-1])
 			if not owner:
