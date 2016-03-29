@@ -8,7 +8,7 @@ import Config, Database, Utils
 TORRENT_STATES = {"S": "seed", "I": "idle", "L": "leech", "+": "starting"}
 TORRENT_ACTIONS = {"seed": "stop", "idle": "start", "leech": "stop", "starting": "stop"}
 
-HEADINGS= ["ID", "Name", "State", "Percent", "Size", "Ratio", "Uploader"]
+HEADINGS = ["ID", "Name", "State", "Percent", "Size", "Ratio", "Uploader"]
 ARROW_DOWN = "▾"
 ARROW_UP = "▴"
 

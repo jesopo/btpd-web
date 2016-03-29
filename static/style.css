@@ -149,6 +149,9 @@ a:hover {
 .seriouslytitle, .viewtitle {
 	font-size: 1.4em;
 	margin-bottom: 6px;
+	word-wrap: break-word;
+	padding-left: 8px;
+	padding-right: 8px;
 }
 .seriouslyquestion, #seriouslybuttons {
 	margin-left: auto;
