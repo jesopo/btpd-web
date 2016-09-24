@@ -13,7 +13,7 @@
 				<tr class="torrent" id="torrent{{ line["id"]|e }}">
 					<td class="torrentid">{{ line["id"]|e }}</td>
 					<td class="torrentname" title="{{ line["title"]|e }}">
-						<a href="view?id={{ line["id"]|e }}"><div class="torrentnamediv">{{ line["title"]|e }}</div></a>
+						<a href="view?id={{ line["id"]|e }}">{{ line["title"]|e }}</a>
 					</td>
 					<td class="torrentstatus"><a class="state{{ line["state"]|e }}" href="action?id={{ line["id"]|e }}">{{ line["state"]|e }}</a></td>
 					<td class="torrentpercent">{{ line["percent"]|e }}</td>
