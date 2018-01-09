@@ -100,7 +100,8 @@ class Database(object):
 			username, hash, salt, admin) VALUES (?, ?, ?,
 			?, ?)""", [None, username, hash, salt, admin])
 	def del_user(self, id):
-		assert id != 1
+		if id == 1:
+			raise ValueError("cannot delete root user")
 		self.cursor().execute(
 			"DELETE FROM users WHERE id=?", [id])
 	def set_password(self, username, new_password):
